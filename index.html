@@ -972,13 +972,11 @@ const LEVEL_LBL  = {beginner:'初階', intermediate:'中階', advanced:'進階'}
 const DELOAD_LBL = {volume:'降量型', intensity:'降強度型', active:'主動恢復型'};
 const SPLIT_LBL  = {3:'全身訓練 × 3', 4:'上下肢分割 × 2', 5:'上肢 × 3 + 下肢 × 2', 6:'推拉腿 PPL × 2'};
 
-// 每次訓練每個複合動作的組數目標（依頻率調整）
-// 頻率高 → 每次組數少；頻率低 → 每次組數多
-// 基準：頻率2次/週 時每動作 3→5 組線性遞增
-// 頻率3次/週 時每動作 2→4 組（週總量相近）
-const SETS_BY_FREQ = {
-  2: {start:3, max:5},  // 每週2次：每動作3→5組
-  3: {start:2, max:4},  // 每週3次：每動作2→4組
+// 每次訓練每個複合動作的組數範圍（依程度 × 頻率）
+const SETS_BY_LEVEL_FREQ = {
+  beginner:     { 2:{start:3, max:5}, 3:{start:2, max:4} },
+  intermediate: { 2:{start:4, max:6}, 3:{start:3, max:5} },
+  advanced:     { 2:{start:4, max:7}, 3:{start:3, max:6} },
 };
 
 function getSplitFreq(splitType, totalDays) {
@@ -993,9 +991,10 @@ function getSplitFreq(splitType, totalDays) {
 }
 
 function getWeekSets(week, numCompounds, splitType) {
-  const mw   = getMesoWeeks();
-  const freq = getSplitFreq(splitType, A.days);
-  const cfg  = SETS_BY_FREQ[freq] || SETS_BY_FREQ[2];
+  const mw    = getMesoWeeks();
+  const level = A.level || 'beginner';
+  const freq  = getSplitFreq(splitType, A.days);
+  const cfg   = (SETS_BY_LEVEL_FREQ[level] || SETS_BY_LEVEL_FREQ.beginner)[freq] || {start:3, max:5};
   const isDeload = week > mw;
   const steps = Math.max(1, mw - 1);
   const inc = (cfg.max - cfg.start) / steps;
