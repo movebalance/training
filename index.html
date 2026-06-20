@@ -972,27 +972,38 @@ const LEVEL_LBL  = {beginner:'初階', intermediate:'中階', advanced:'進階'}
 const DELOAD_LBL = {volume:'降量型', intensity:'降強度型', active:'主動恢復型'};
 const SPLIT_LBL  = {3:'全身訓練 × 3', 4:'上下肢分割 × 2', 5:'上肢 × 3 + 下肢 × 2', 6:'推拉腿 PPL × 2'};
 
-// 每次訓練複合動作總組數上限（依分割類型）
-const COMPOUND_SETS_CAP = {全身:10, 上肢:10, 下肢:8, 推:8, 拉:8, 腿:8};
+// 每次訓練每個複合動作的組數目標（依頻率調整）
+// 頻率高 → 每次組數少；頻率低 → 每次組數多
+// 基準：頻率2次/週 時每動作 3→5 組線性遞增
+// 頻率3次/週 時每動作 2→4 組（週總量相近）
+const SETS_BY_FREQ = {
+  2: {start:3, max:5},  // 每週2次：每動作3→5組
+  3: {start:2, max:4},  // 每週3次：每動作2→4組
+};
 
-// 計算本週每個複合動作應該做幾組（Helms 線性波動）
-// 週總複合組數從起始線性遞增到上限，再平均分給各複合動作
-// 減量週：最後訓練週組數 × 50%
+function getSplitFreq(splitType, totalDays) {
+  const d = parseInt(totalDays) || 4;
+  if (splitType === '全身') return 3;
+  if (splitType === '上肢') return d <= 4 ? 2 : 3;
+  if (splitType === '下肢') return 2;
+  if (splitType === '推')   return 2;
+  if (splitType === '拉')   return 2;
+  if (splitType === '腿')   return 2;
+  return 2;
+}
+
 function getWeekSets(week, numCompounds, splitType) {
-  const mw = getMesoWeeks();
+  const mw   = getMesoWeeks();
+  const freq = getSplitFreq(splitType, A.days);
+  const cfg  = SETS_BY_FREQ[freq] || SETS_BY_FREQ[2];
   const isDeload = week > mw;
-  const cap = COMPOUND_SETS_CAP[splitType] || 8;
-  const n = Math.max(1, numCompounds);
-  // 起始每動作 3 組，目標是最後一週達到 cap/n（但不超過每動作 5 組）
-  const maxPerEx = Math.min(5, Math.floor(cap / n));
-  const startPerEx = 3;
   const steps = Math.max(1, mw - 1);
-  const incPerWeek = (maxPerEx - startPerEx) / steps;
+  const inc = (cfg.max - cfg.start) / steps;
   if (isDeload) {
-    const lastWeekSets = Math.round(startPerEx + (mw - 1) * incPerWeek);
-    return Math.max(1, Math.round(lastWeekSets * 0.5));
+    const lastSets = Math.round(cfg.start + (mw - 1) * inc);
+    return Math.max(1, Math.round(lastSets * 0.5));
   }
-  return Math.min(maxPerEx, Math.round(startPerEx + (week - 1) * incPerWeek));
+  return Math.round(cfg.start + (week - 1) * inc);
 }
 
 // 本週建議 RIR 目標（Helms：第1週輕鬆 RIR 3–4，逐週下降到最後一週 RIR 0–1）
