@@ -2148,11 +2148,28 @@ async function doLogin() {
   const errEl = document.getElementById('login-err');
   if (!email || !pw) { errEl.textContent='請填寫電子郵件和密碼'; return; }
   btn.disabled = true; btn.textContent = '登入中…';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
   if (error) {
     errEl.textContent = error.message.includes('Invalid') ? '電子郵件或密碼錯誤' : error.message;
     btn.disabled = false; btn.textContent = '登入';
+    return;
   }
+  // 登入成功，直接跳轉（不依賴 onAuthStateChange）
+  if (data?.user) {
+    currentUser = data.user;
+    setSyncStatus('sync');
+    let hasCloud = false;
+    try { hasCloud = await loadFromSupabase(currentUser.id); } catch(e) {}
+    setSyncStatus(hasCloud ? 'ok' : 'err');
+    if (hasCloud) {
+      goScreen('screen-home'); renderHome();
+    } else {
+      const hasLocal = load();
+      if (hasLocal) { goScreen('screen-home'); renderHome(); syncToSupabase(); }
+      else { goScreen('screen-onboard'); }
+    }
+  }
+  btn.disabled = false; btn.textContent = '登入';
 }
 
 async function doRegister() {
