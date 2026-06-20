@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>永衡運動｜訓練課表</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: rgba(0,0,0,0.10);
+  --border-mid: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text2: #6b6b67;
+  --text3: #a8a8a3;
+  --accent: #1a1a18;
+  --accent-fg: #f7f6f3;
+  --green-bg: #e8f5e4;
+  --green-text: #2d6b22;
+  --blue-bg: #e4eef8;
+  --blue-text: #1a4a7a;
+  --amber-bg: #fdf0d8;
+  --amber-text: #7a4e10;
+  --red-bg: #fce8e8;
+  --red-text: #7a1f1f;
+  --gray-bg: #eeece8;
+  --gray-text: #4a4a46;
+  --success: #2d6b22;
+  --danger: #c0392b;
+  --warning: #b06800;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.screen { display: none; }
+.screen.active { display: block; }
+.page { max-width: 600px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+
+/* ── NAV ── */
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(247,246,243,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: .75rem 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-left { display: flex; align-items: center; gap: .5rem; }
+.nav-back {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; color: var(--text2); cursor: pointer;
+  padding: 5px 10px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface);
+  transition: background .12s;
+}
+.nav-back:hover { background: var(--surface2); }
+.nav-title { font-size: 15px; font-weight: 500; }
+.nav-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* ── PROGRESS BAR ── */
+.prog-bar { height: 2px; background: var(--border); margin-bottom: 2rem; border-radius: 2px; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .35s ease; }
+
+/* ── TYPOGRAPHY ── */
+.step-lbl { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: .35rem; font-family: 'DM Mono', monospace; }
+.step-title { font-size: 22px; font-weight: 500; margin-bottom: .3rem; line-height: 1.25; letter-spacing: -.02em; }
+.step-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.65; }
+.section-div { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; padding: .875rem 0 .5rem; border-top: 1px solid var(--border); margin-top: .5rem; font-family: 'DM Mono', monospace; }
+
+/* ── CHIPS ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+.chip {
+  padding: 7px 14px; border: 1px solid var(--border-mid); border-radius: 20px;
+  font-size: 13px; color: var(--text2); cursor: pointer;
+  background: var(--surface); transition: all .12s; user-select: none;
+}
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip.sel { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+/* ── FORM ── */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.field-lbl { font-size: 12px; color: var(--text2); margin-bottom: .3rem; display: block; }
+input[type=number], input[type=text], select {
+  width: 100%; padding: 9px 12px; font-size: 14px;
+  border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text); outline: none;
+  font-family: inherit; transition: border-color .12s;
+}
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,26,24,.07); }
+.w-row {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; gap: 8px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.w-row:last-child { border-bottom: none; }
+.w-name { font-size: 13px; font-weight: 500; }
+.w-equip { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.w-inp-wrap { display: flex; align-items: center; gap: 5px; }
+.w-inp-wrap input { width: 72px; text-align: center; padding: 7px 8px; font-size: 13px; }
+.w-unit { font-size: 12px; color: var(--text3); }
+
+/* ── NOTICE ── */
+.notice {
+  font-size: 12px; color: var(--text2);
+  background: var(--surface2); border-radius: var(--r-sm);
+  padding: .625rem .875rem; margin-bottom: 1rem; line-height: 1.65;
+}
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 8px; margin-top: 1.25rem; }
+.btn-back-ob {
+  padding: 10px 18px; border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  font-size: 13px; color: var(--text2); background: var(--surface);
+  cursor: pointer; font-family: inherit; transition: background .12s;
+}
+.btn-back-ob:hover { background: var(--surface2); }
+.btn-next {
+  flex: 1; padding: 10px 18px; border: 1px solid var(--accent); border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 500; color: var(--accent-fg); background: var(--accent);
+  cursor: pointer; font-family: inherit; transition: opacity .12s;
+}
+.btn-next:hover { opacity: .83; }
+.btn-next:disabled { opacity: .28; cursor: not-allowed; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border: 1px solid var(--accent); border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 500; color: var(--accent-fg); background: var(--accent);
+  cursor: pointer; font-family: inherit; transition: opacity .12s;
+}
+.btn-primary:hover { opacity: .83; }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  font-size: 13px; color: var(--text2); background: var(--surface);
+  cursor: pointer; font-family: inherit; transition: background .12s;
+}
+.btn-secondary:hover { background: var(--surface2); }
+.btn-danger {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border: 1px solid rgba(192,57,43,.3); border-radius: var(--r-sm);
+  font-size: 13px; color: var(--danger); background: transparent;
+  cursor: pointer; font-family: inherit; transition: background .12s;
+}
+.btn-danger:hover { background: var(--red-bg); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 1rem 1.125rem;
+  box-shadow: var(--shadow);
+}
+.card + .card { margin-top: 8px; }
+
+/* ── STAT GRID ── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 1.25rem; }
+.stat-card { background: var(--surface2); border-radius: var(--r-sm); padding: .75rem 1rem; }
+.stat-lbl { font-size: 10px; color: var(--text3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .05em; font-family: 'DM Mono', monospace; }
+.stat-val { font-size: 19px; font-weight: 500; letter-spacing: -.01em; }
+
+/* ── BADGES ── */
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 500; white-space: nowrap; font-family: 'DM Mono', monospace; }
+.badge-a { background: var(--blue-bg); color: var(--blue-text); }
+.badge-b { background: var(--green-bg); color: var(--green-text); }
+.badge-c { background: var(--amber-bg); color: var(--amber-text); }
+.badge-done { background: var(--green-bg); color: var(--green-text); }
+.badge-deload { background: var(--gray-bg); color: var(--gray-text); }
+
+/* ── WEEK NAV ── */
+.week-nav { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1rem; }
+.wk-btn {
+  padding: 5px 12px; border: 1px solid var(--border-mid); border-radius: 16px;
+  font-size: 12px; color: var(--text2); cursor: pointer; background: var(--surface);
+  font-family: 'DM Mono', monospace; transition: all .12s;
+}
+.wk-btn:hover { border-color: var(--accent); color: var(--text); }
+.wk-btn.act { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.wk-btn.deload { border-style: dashed; }
+
+/* ── DAY LIST ── */
+.day-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 1.25rem; }
+.day-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: .875rem 1.125rem;
+  cursor: pointer; display: grid; grid-template-columns: 1fr auto;
+  align-items: center; gap: 10px; box-shadow: var(--shadow);
+  transition: border-color .12s, transform .1s;
+}
+.day-card:hover { border-color: var(--border-mid); transform: translateY(-1px); }
+.day-card.done { border-color: rgba(45,107,34,.3); }
+.day-card.done .day-name { color: var(--text2); }
+.day-name { font-size: 14px; font-weight: 500; }
+.day-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── EXERCISE CARDS ── */
+.ex-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); margin-bottom: 8px; overflow: hidden; box-shadow: var(--shadow);
+}
+.ex-hd {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; padding: .875rem 1.125rem; cursor: pointer; gap: 8px;
+  transition: background .12s;
+}
+.ex-hd:hover { background: var(--surface2); }
+.ex-nm { font-size: 14px; font-weight: 500; }
+.ex-mt { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.ex-bd { border-top: 1px solid var(--border); padding: .875rem 1.125rem; }
+.chevron { font-size: 14px; color: var(--text3); transition: transform .18s; display: inline-block; }
+.chevron.open { transform: rotate(180deg); }
+
+/* ── SET TABLE ── */
+.set-tbl { width: 100%; border-collapse: collapse; margin-bottom: .625rem; table-layout: fixed; }
+.set-tbl th {
+  font-size: 10px; color: var(--text3); text-transform: uppercase;
+  letter-spacing: .06em; font-weight: 400; padding: 0 0 6px;
+  text-align: left; font-family: 'DM Mono', monospace;
+}
+.set-tbl th:not(:first-child) { text-align: center; }
+.set-tbl td { padding: 4px 0; border-top: 1px solid var(--border); vertical-align: middle; }
+.set-tbl td:not(:first-child) { text-align: center; }
+.set-num { font-size: 12px; color: var(--text3); width: 20px; font-family: 'DM Mono', monospace; }
+.sug { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+input.si {
+  width: 62px; text-align: center; padding: 5px 6px; font-size: 12px;
+  border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text); font-family: 'DM Mono', monospace;
+}
+input.si:focus { outline: none; border-color: var(--accent); }
+select.ri {
+  width: 58px; padding: 5px 3px; font-size: 12px;
+  border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text); font-family: inherit;
+}
+
+/* ── ADJ ROW ── */
+.adj-row { display: flex; align-items: center; gap: 7px; margin-bottom: .875rem; }
+.adj-lbl { font-size: 12px; color: var(--text3); }
+.btn-adj {
+  padding: 4px 11px; border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  font-size: 12px; cursor: pointer; background: var(--surface); color: var(--text2);
+  font-family: inherit; transition: background .12s;
+}
+.btn-adj:hover { background: var(--surface2); }
+.btn-adj.dn { color: var(--danger); border-color: rgba(192,57,43,.3); }
+.btn-adj.dn:hover { background: var(--red-bg); }
+.btn-adj.up { color: var(--success); border-color: rgba(45,107,34,.3); }
+.btn-adj.up:hover { background: var(--green-bg); }
+.adj-note { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+/* ── FINISH BAR ── */
+.finish-bar {
+  display: flex; gap: 7px; margin-top: 1rem;
+  padding-top: .875rem; border-top: 1px solid var(--border);
+}
+
+/* ── PROGRESS ANALYSIS ── */
+.prog-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); margin-bottom: 8px; overflow: hidden; box-shadow: var(--shadow);
+}
+.prog-hd {
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: center; padding: .875rem 1.125rem; gap: 10px; cursor: pointer;
+  transition: background .12s;
+}
+.prog-hd:hover { background: var(--surface2); }
+.prog-nm { font-size: 14px; font-weight: 500; }
+.prog-sub { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.prog-pill { font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.pill-up { background: var(--green-bg); color: var(--green-text); }
+.pill-hold { background: var(--blue-bg); color: var(--blue-text); }
+.pill-dn { background: var(--red-bg); color: var(--red-text); }
+.prog-bd { border-top: 1px solid var(--border); padding: .875rem 1.125rem; }
+.data-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 7px; margin-bottom: .75rem; }
+.dc { background: var(--surface2); border-radius: var(--r-sm); padding: .5rem .75rem; }
+.dl { font-size: 10px; color: var(--text3); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .05em; font-family: 'DM Mono', monospace; }
+.dv { font-size: 15px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.dv.g { color: var(--success); } .dv.w { color: var(--warning); } .dv.d { color: var(--danger); }
+.reason {
+  font-size: 12px; color: var(--text2); line-height: 1.7;
+  padding: .625rem .875rem; background: var(--surface2);
+  border-radius: var(--r-sm); margin-bottom: .75rem;
+}
+.next-g { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: .5rem; }
+.nc { border: 1px solid var(--border); border-radius: var(--r-md); padding: .75rem .875rem; }
+.nc.hi { border-color: rgba(45,107,34,.4); }
+.nc-l { font-size: 10px; color: var(--text3); margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .05em; font-family: 'DM Mono', monospace; }
+.nc-v { font-size: 17px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.nc.hi .nc-v { color: var(--success); }
+.nc-s { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.ov-row { display: flex; align-items: center; gap: 7px; margin-top: .5rem; }
+.ov-lbl { font-size: 11px; color: var(--text3); flex: 1; }
+input.oi {
+  width: 68px; padding: 5px 8px; text-align: center; font-size: 12px;
+  border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text); font-family: 'DM Mono', monospace;
+}
+input.oi:focus { outline: none; border-color: var(--accent); }
+.btn-ap {
+  padding: 5px 12px; border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+  font-size: 12px; cursor: pointer; background: var(--surface); color: var(--text2);
+  font-family: inherit; transition: background .12s;
+}
+.btn-ap:hover { background: var(--surface2); }
+
+/* ── PROG ACTIONS ── */
+.prog-actions { display: flex; gap: 7px; margin-top: 1.25rem; padding-top: .875rem; border-top: 1px solid var(--border); }
+.confirmed-notice {
+  background: var(--green-bg); border-radius: var(--r-sm);
+  padding: .625rem 1rem; font-size: 13px; color: var(--green-text);
+  margin-top: .875rem; text-align: center;
+}
+
+/* ── SUMMARY ── */
+.summary-card { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+.sum-sec { padding: .875rem 1.125rem; border-bottom: 1px solid var(--border); background: var(--surface); }
+.sum-sec:last-child { border-bottom: none; }
+.sum-sec-t { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: .625rem; font-family: 'DM Mono', monospace; }
+.sum-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+.sum-k { color: var(--text2); } .sum-v { font-weight: 500; text-align: right; max-width: 55%; }
+
+/* ── DELOAD ── */
+.deload-box {
+  border: 1px dashed var(--border-mid); border-radius: var(--r-md);
+  padding: 1.5rem; text-align: center; color: var(--text2); line-height: 1.9;
+  margin-bottom: 1rem; background: var(--surface);
+}
+
+/* ── HOME HEADER ── */
+.home-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1rem 1rem;
+}
+.home-brand {
+  font-size: 13px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: .25rem;
+  font-family: 'DM Mono', monospace;
+}
+.home-title { font-size: 24px; font-weight: 500; letter-spacing: -.025em; margin-bottom: .2rem; }
+.home-sub { font-size: 12px; color: var(--text3); }
+
+/* ── SPLIT PREVIEW ── */
+.split-prev { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+.split-row { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.split-row:last-child { border-bottom: none; }
+
+/* ── RESET AREA ── */
+.reset-area { padding: 1rem 0 0; border-top: 1px solid var(--border); margin-top: .5rem; }
+
+/* ── AUTH SCREEN ── */
+.auth-wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+.auth-logo { font-size: 20px; font-weight: 500; letter-spacing: -.02em; margin-bottom: .25rem; }
+.auth-tagline { font-size: 13px; color: var(--text3); margin-bottom: 2.5rem; }
+.auth-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.75rem 1.5rem; box-shadow: var(--shadow); }
+.auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+.auth-tab { flex: 1; padding: .625rem; text-align: center; font-size: 13px; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s; }
+.auth-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
+.auth-field { margin-bottom: 1rem; }
+.auth-label { font-size: 11px; color: var(--text2); margin-bottom: .375rem; display: block; font-family: 'DM Mono', monospace; letter-spacing: .05em; text-transform: uppercase; }
+.auth-input { width: 100%; padding: .625rem .875rem; border: 1px solid var(--border-mid); border-radius: var(--r-sm); font-size: 14px; background: var(--surface); color: var(--text); font-family: inherit; transition: border .15s; }
+.auth-input:focus { outline: none; border-color: var(--accent); }
+.auth-btn { width: 100%; padding: .75rem; background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--r-sm); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+.auth-btn:hover { opacity: .85; }
+.auth-btn:disabled { opacity: .45; cursor: not-allowed; }
+.auth-err { font-size: 12px; color: var(--danger); margin-top: .75rem; text-align: center; min-height: 18px; }
+.auth-msg { font-size: 12px; color: var(--success); margin-top: .75rem; text-align: center; min-height: 18px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); display: inline-block; margin-right: 5px; }
+.sync-dot.ok { background: var(--success); }
+.sync-dot.err { background: var(--danger); }
+
+/* ── ICON SVG ── */
+svg.icon { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ══════════════════ MESO REVIEW ══════════════════ -->
+<div id="screen-meso-review" class="screen">
+<div class="nav">
+  <div class="nav-left">
+    <div class="nav-back" onclick="goScreen('screen-home');renderHome()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      返回
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="nav-title">Mesocycle 回顧</div>
+    <div class="nav-sub">進入下一週期前的課表建議</div>
+  </div>
+</div>
+<div class="page">
+  <div id="meso-review-content"></div>
+  <div style="display:flex;gap:8px;margin-top:1.25rem;padding-top:.875rem;border-top:1px solid var(--border)">
+    <button class="btn-secondary" onclick="goScreen('screen-home');renderHome()">稍後再說</button>
+    <button class="btn-primary" style="flex:1;justify-content:center" onclick="advanceMesocycle()">
+      了解，進入下一週期 →
+    </button>
+  </div>
+</div>
+</div>
+
+
+<!-- ══════════════════ AUTH ══════════════════ -->
+<div id="screen-auth" class="screen active">
+<div class="auth-wrap">
+  <div class="auth-logo">永衡運動工作室</div>
+  <div class="auth-tagline">專屬訓練課表系統</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">登入</div>
+      <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">註冊</div>
+    </div>
+    <!-- 登入 -->
+    <div id="auth-login-form">
+      <div class="auth-field">
+        <label class="auth-label">電子郵件</label>
+        <input class="auth-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">密碼</label>
+        <input class="auth-input" type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" id="btn-login" onclick="doLogin()">登入</button>
+      <div class="auth-err" id="login-err"></div>
+    </div>
+    <!-- 註冊 -->
+    <div id="auth-register-form" style="display:none">
+      <div class="auth-field">
+        <label class="auth-label">姓名</label>
+        <input class="auth-input" type="text" id="reg-name" placeholder="你的名字">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">電子郵件</label>
+        <input class="auth-input" type="email" id="reg-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">密碼（6 字元以上）</label>
+        <input class="auth-input" type="password" id="reg-pw" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button class="auth-btn" id="btn-register" onclick="doRegister()">建立帳號</button>
+      <div class="auth-err" id="register-err"></div>
+      <div class="auth-msg" id="register-msg"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════ ONBOARDING ══════════════════ -->
+<div id="screen-onboard" class="screen">
+<div class="page">
+  <div class="prog-bar"><div class="prog-fill" id="ob-prog" style="width:14%"></div></div>
+
+  <div id="ob-s1">
+    <div class="step-lbl">步驟 1 / 7</div>
+    <div class="step-title">主要訓練目標</div>
+    <div class="step-sub">決定每週三種訓練日的強度分配比例</div>
+    <div class="notice" style="margin-bottom:1rem">
+      <strong>肌力提升</strong>：偏重大重量低次數（5×5），適合想提升最大力量或運動表現的人<br>
+      <strong>肌肥大</strong>：偏重中等重量中次數（4×8、3×12），適合以增加肌肉量為主要目標<br>
+      <strong>兩者兼顧</strong>：三種強度均衡搭配，適合大多數健身客戶，也是最推薦的入門選擇
+    </div>
+    <div class="chips">
+      <div class="chip" data-f="goal" data-v="strength" onclick="pick(this)">肌力提升</div>
+      <div class="chip" data-f="goal" data-v="hypertrophy" onclick="pick(this)">肌肥大</div>
+      <div class="chip" data-f="goal" data-v="both" onclick="pick(this)">兩者兼顧</div>
+    </div>
+    <div class="btn-row"><button class="btn-next" id="ob-n1" onclick="obNext(1)" disabled>下一步 →</button></div>
+  </div>
+
+  <div id="ob-s2" style="display:none">
+    <div class="step-lbl">步驟 2 / 7</div>
+    <div class="step-title">重量訓練年資</div>
+    <div class="step-sub">影響起始訓練量、漸進速度與 Deload 頻率</div>
+    <div class="notice" style="margin-bottom:1rem">
+      <strong>初階（未滿1年）</strong>：較低的起始訓練量，每6週安排一次減量週，讓身體有充足時間適應<br>
+      <strong>中階（1–3年）</strong>：中等起始量，每4週減量，訓練量遞增速度適中<br>
+      <strong>進階（3年以上）</strong>：較高起始量，每3週減量，需要更大刺激才能持續進步<br>
+      <span style="color:var(--text3)">不確定的話選初階，之後可以重新設定</span>
+    </div>
+    <div class="chips">
+      <div class="chip" data-f="level" data-v="beginner" onclick="pick(this)">初階　未滿 1 年</div>
+      <div class="chip" data-f="level" data-v="intermediate" onclick="pick(this)">中階　1–3 年</div>
+      <div class="chip" data-f="level" data-v="advanced" onclick="pick(this)">進階　3 年以上</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back-ob" onclick="obStep(1)">← 上一步</button>
+      <button class="btn-next" id="ob-n2" onclick="obNext(2)" disabled>下一步 →</button>
+    </div>
+  </div>
+
+  <div id="ob-s3" style="display:none">
+    <div class="step-lbl">步驟 3 / 7</div>
+    <div class="step-title">基本資料</div>
+    <div class="step-sub">影響恢復速度係數</div>
+    <div class="field-row">
+      <div><label class="field-lbl">性別</label><select id="ob-gender" onchange="chk3()"><option value="">請選擇</option><option value="male">男</option><option value="female">女</option></select></div>
+      <div><label class="field-lbl">年齡</label><input type="number" id="ob-age" min="14" max="90" placeholder="歲" oninput="chk3()"></div>
+    </div>
+    <div class="field-row">
+      <div><label class="field-lbl">體重（kg）<span style="color:var(--text3);font-size:11px"> 選填，用於推算建議重量</span></label>
+        <input type="number" id="ob-bw" min="30" max="200" step="0.5" placeholder="例：65" oninput="if(this.value) A.bodyWeight=parseFloat(this.value)">
+      </div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+        <span style="font-size:12px;color:var(--text3);line-height:1.5">填入體重後，系統可為沒有填重量的動作自動推算起始建議重量</span>
+      </div>
+    </div>
+    <div style="margin-bottom:.75rem">
+      <label class="field-lbl">每週訓練天數</label>
+      <div class="chips" style="margin-bottom:0">
+        <div class="chip" data-f="days" data-v="3" onclick="pick(this);chk3()">3 天</div>
+        <div class="chip" data-f="days" data-v="4" onclick="pick(this);chk3()">4 天</div>
+        <div class="chip" data-f="days" data-v="5" onclick="pick(this);chk3()">5 天</div>
+        <div class="chip" data-f="days" data-v="6" onclick="pick(this);chk3()">6 天</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back-ob" onclick="obStep(2)">← 上一步</button>
+      <button class="btn-next" id="ob-n3" onclick="obNext(3)" disabled>下一步 →</button>
+    </div>
+  </div>
+
+  <div id="ob-s4" style="display:none">
+    <div class="step-lbl">步驟 4 / 7</div>
+    <div class="step-title">訓練分割預覽</div>
+    <div class="step-sub">系統依天數自動選擇最適合的分割方式</div>
+    <div class="notice" style="margin-bottom:1rem">
+      課表採用<strong>波動週期（DUP）</strong>設計：每次訓練的強度和次數不同，讓身體持續面對新的刺激。<br>
+      <strong>Day A</strong>（大重量低次數）→ 訓練神經系統徵召能力<br>
+      <strong>Day B</strong>（中等重量中次數）→ 最大化肌肉生長刺激<br>
+      <strong>Day C</strong>（輕重量高次數）→ 代謝壓力與肌肉泵感<br>
+      三種模式輪替比單一強度訓練有更好的長期適應效果。
+    </div>
+    <div id="ob-split-prev"></div>
+    <div class="btn-row">
+      <button class="btn-back-ob" onclick="obStep(3)">← 上一步</button>
+      <button class="btn-next" onclick="obNext(4)">下一步 →</button>
+    </div>
+  </div>
+
+  <div id="ob-s5" style="display:none">
+    <div class="step-lbl">步驟 5 / 7</div>
+    <div class="step-title">各動作參考重量</div>
+    <div class="step-sub">填入可以穩定做 10 下的重量，不確定可留空</div>
+    <div class="notice">
+      <strong>如何測試 10RM（第一次訓練時）</strong><br>
+      1. 先用輕重量熱身 2 組（約 50% 估計重量）<br>
+      2. 選一個你覺得「有點重但應該可以做 10 下」的重量<br>
+      3. 嘗試做 10 下——最後 2–3 下要有明顯費力感，但動作不變形<br>
+      4. 做完後 RIR 約在 1–2（還能再做 1–2 下就停住）代表重量合適<br>
+      5. 太輕（做完很輕鬆）→ 下次加重；太重（10 下做不完）→ 下次減重<br>
+      <span style="color:var(--text3)">不確定可以先留空，系統會在第一次訓練後根據你填入的紀錄自動校正</span>
+    </div>
+    <div class="section-div">下肢</div>
+    <div class="w-row"><div><div class="w-name">背蹲舉</div><div class="w-equip">蹲舉架 + 槓鈴（含槓 20 kg）</div></div><div class="w-inp-wrap"><input type="number" id="wr-squat" min="0" step="2.5" placeholder="—"><span class="w-unit">kg</span></div></div>
+    <div class="w-row"><div><div class="w-name">傳統硬舉</div><div class="w-equip">含槓 20 kg</div></div><div class="w-inp-wrap"><input type="number" id="wr-deadlift" min="20" step="2.5" placeholder="—"><span class="w-unit">kg</span></div></div>
+    <div class="w-row"><div><div class="w-name">腿推機</div><div class="w-equip">插銷標示數字</div></div><div class="w-inp-wrap"><input type="number" id="wr-legpress" min="0" step="1" placeholder="—"><span class="w-unit">格</span></div></div>
+    <div class="w-row"><div><div class="w-name">Leg Extension（踢腿）</div><div class="w-equip">插銷標示數字</div></div><div class="w-inp-wrap"><input type="number" id="wr-legext" min="0" step="1" placeholder="—"><span class="w-unit">格</span></div></div>
+    <div class="w-row"><div><div class="w-name">Leg Curl（勾腿）</div><div class="w-equip">掛片重量</div></div><div class="w-inp-wrap"><input type="number" id="wr-legcurl" min="0" step="2.5" placeholder="—"><span class="w-unit">kg</span></div></div>
+    <div class="section-div">上肢推</div>
+    <div class="w-row"><div><div class="w-name">槓鈴胸推</div><div class="w-equip">含槓 20 kg</div></div><div class="w-inp-wrap"><input type="number" id="wr-bench" min="20" step="2.5" placeholder="—"><span class="w-unit">kg</span></div></div>
+    <div class="w-row"><div><div class="w-name">槓鈴肩推</div><div class="w-equip">含槓 20 kg</div></div><div class="w-inp-wrap"><input type="number" id="wr-ohp" min="0" step="2.5" placeholder="—"><span class="w-unit">kg</span></div></div>
+    <div class="section-div">上肢拉</div>
+    <div class="w-row"><div><div class="w-name">下拉</div><div class="w-equip">插銷標示數字</div></div><div class="w-inp-wrap"><input type="number" id="wr-pulldown" min="0" step="1" placeholder="—"><span class="w-unit">格</span></div></div>
+    <div class="w-row"><div><div class="w-name">坐姿划船</div><div class="w-equip">插銷標示數字</div></div><div class="w-inp-wrap"><input type="number" id="wr-seatedrow" min="0" step="1" placeholder="—"><span class="w-unit">格</span></div></div>
+    <div class="w-row">
+      <div>
+        <div class="w-name">引體向上</div>
+        <div class="w-equip">連續最多次數（做不到可填 0 或留空）</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">做不到引體向上的話，系統會自動安排輔助引體向上或下拉機代替</div>
+      </div>
+      <div class="w-inp-wrap"><input type="number" id="wr-pullup" min="0" step="1" placeholder="—"><span class="w-unit">下</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back-ob" onclick="obStep(4)">← 上一步</button>
+      <button class="btn-next" onclick="obNext(5)">下一步 →</button>
+    </div>
+  </div>
+
+  <div id="ob-s6" style="display:none">
+    <div class="step-lbl">步驟 6 / 7</div>
+    <div class="step-title">進階選項</div>
+    <div class="step-sub">選填，不勾選使用預設值</div>
+    <div style="margin-bottom:1rem">
+      <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text2);cursor:pointer">
+        <input type="checkbox" id="ob-frontsq" style="width:15px;height:15px"> 開放前蹲舉（需具備基礎動作能力）
+      </label>
+    </div>
+    <div style="margin-bottom:.875rem">
+      <label class="field-lbl">Mesocycle 長度</label>
+      <div class="notice" style="margin-bottom:.625rem;font-size:12px">
+        <strong>建議直接用「系統自動」</strong>（初階 6 週、中階 4 週、進階 3 週）。<br>
+        系統會在每次減量週後自動重置，不需要手動調整。<br>
+        <span style="color:var(--text3)">有特殊需求（例如賽前調整）才需要手動選擇</span>
+      </div>
+      <div class="chips" style="margin-bottom:0">
+        <div class="chip sel" data-f="meso" data-v="auto" onclick="pickMeso(this)">系統自動</div>
+        <div class="chip" data-f="meso" data-v="3" onclick="pickMeso(this)">3 週</div>
+        <div class="chip" data-f="meso" data-v="4" onclick="pickMeso(this)">4 週</div>
+        <div class="chip" data-f="meso" data-v="5" onclick="pickMeso(this)">5 週</div>
+        <div class="chip" data-f="meso" data-v="6" onclick="pickMeso(this)">6 週</div>
+      </div>
+    </div>
+    <div style="margin-bottom:.875rem">
+      <label class="field-lbl">Deload 方式</label>
+      <div class="notice" style="margin-bottom:.625rem;font-size:12px">
+        <strong>降量型</strong>（推薦）：維持相同重量，組數減半。讓重量感覺保持熟悉，身體又能充分恢復<br>
+        <strong>降強度型</strong>：維持組數，重量降 10%。適合希望維持動作節奏感的人<br>
+        <strong>主動恢復型</strong>：不進行重量訓練，改為散步、伸展或輕度有氧。適合疲勞特別嚴重時
+      </div>
+      <div class="chips" style="margin-bottom:0">
+        <div class="chip sel" data-f="deload" data-v="volume" onclick="pick(this)">降量型</div>
+        <div class="chip" data-f="deload" data-v="intensity" onclick="pick(this)">降強度型</div>
+        <div class="chip" data-f="deload" data-v="active" onclick="pick(this)">主動恢復型</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back-ob" onclick="obStep(5)">← 上一步</button>
+      <button class="btn-next" onclick="obNext(6)">下一步 →</button>
+    </div>
+  </div>
+
+  <div id="ob-s7" style="display:none">
+    <div class="step-lbl">步驟 7 / 7</div>
+    <div class="step-title">確認設定</div>
+    <div class="step-sub">確認後生成第一個 Mesocycle 課表</div>
+    <div class="notice" style="margin-bottom:1rem">
+      <strong>開始訓練前請注意</strong><br>
+      • 第一週建議用<strong>稍輕的重量</strong>熟悉動作，確認 RIR 是否與感受吻合<br>
+      • <strong>RIR（還能再做幾下）</strong>：完成每組後評估還能多做幾下。RIR 2 = 還能再做 2 下才力竭<br>
+      • 每完成一天按「完成本日訓練」，所有訓練日完成後系統自動生成下週建議<br>
+      • 如果某天狀態不好，可用訓練日的「調降」按鈕臨時降低 5% 重量
+    </div>
+    <div class="summary-card" id="ob-summary"></div>
+    <div class="btn-row">
+      <button class="btn-back-ob" onclick="obStep(6)">← 修改</button>
+      <button class="btn-next" onclick="finishOnboard()">生成課表 →</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════ HOME ══════════════════ -->
+<div id="screen-home" class="screen">
+<div class="home-header">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+    <div class="home-brand">永衡運動</div>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <span style="font-size:12px;color:var(--text3)" id="sync-status"><span class="sync-dot" id="sync-dot"></span><span id="sync-label">同步中…</span></span>
+      <button class="btn-secondary" style="font-size:11px;padding:4px 10px" onclick="doLogout()">登出</button>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div>
+      <div class="home-title" id="home-title">訓練課表</div>
+      <div class="home-sub" id="home-sub"></div>
+    </div>
+    <button class="btn-secondary" onclick="goScreen('screen-progress');renderProgress()">分析報告</button>
+  </div>
+</div>
+<div class="page" style="padding-top:1.25rem">
+  <div class="stat-grid" id="home-stats"></div>
+  <div class="week-nav" id="home-week-nav"></div>
+  <div class="day-list" id="home-day-list"></div>
+  <div class="reset-area" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <button class="btn-secondary" style="font-size:12px" onclick="exportExcel()">匯出 Excel 課表</button>
+    <button class="btn-secondary" style="font-size:12px" onclick="confirmReset()">重新設定課表</button>
+    <span style="font-size:11px;color:var(--text3);flex:1">訓練目標改變、換場館或訓練天數調整時重新設定</span>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════ SESSION ══════════════════ -->
+<div id="screen-session" class="screen">
+<div class="nav">
+  <div class="nav-left">
+    <div class="nav-back" onclick="goScreen('screen-home');renderHome()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      返回
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="nav-title" id="sess-title"></div>
+    <div class="nav-sub" id="sess-sub"></div>
+  </div>
+</div>
+<div class="page">
+  <div class="stat-grid" id="sess-stats"></div>
+  <div class="adj-row">
+    <span class="adj-lbl" title="睡眠不足、壓力大或感覺特別疲勞時可調降；狀態特別好時可調升。每級±5%，影響本日所有動作建議重量。">強度調整 ⓘ</span>
+    <button class="btn-adj dn" onclick="sessAdj(-1)">↓ 調降</button>
+    <button class="btn-adj up" onclick="sessAdj(1)">↑ 調升</button>
+    <span class="adj-note" id="sess-adj-note"></span>
+  </div>
+  <div id="sess-ex-list"></div>
+  <div class="finish-bar">
+    <button class="btn-secondary" onclick="skipSession()">略過本日</button>
+    <button class="btn-primary" style="flex:1;justify-content:center" onclick="finishSession()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      完成本日訓練
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════ PROGRESS ══════════════════ -->
+<div id="screen-progress" class="screen">
+<div class="nav">
+  <div class="nav-left">
+    <div class="nav-back" onclick="goScreen('screen-home');renderHome()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      返回
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="nav-title">漸進分析報告</div>
+    <div class="nav-sub" id="prog-sub"></div>
+  </div>
+</div>
+<div class="page">
+  <div class="stat-grid" id="prog-stats"></div>
+  <div id="prog-ex-list"></div>
+  <div class="prog-actions">
+    <button class="btn-danger" onclick="triggerDeload()">需要減量</button>
+    <button class="btn-primary" style="flex:1;justify-content:center" id="prog-confirm-btn" onclick="confirmProg()">
+      確認下週課表 →
+    </button>
+  </div>
+  <div id="prog-confirmed" style="display:none" class="confirmed-notice">✓ 下週課表已確認，建議重量已更新</div>
+</div>
+</div>
+
+<script>
+// ══ CONSTANTS ══
+
+// Helms Muscle & Strength Pyramid — 依目標設定 rep range 和強度
+// range: 每組次數範圍  pct: 建議佔 1RM 的比例
+const GOAL_CONFIG = {
+  strength:    {range:[3,5],  pct:.87, desc:'肌力　3–5 下'},
+  both:        {range:[6,8],  pct:.78, desc:'兼顧　6–8 下'},
+  hypertrophy: {range:[8,12], pct:.70, desc:'肌肥大　8–12 下'}
+};
+
+// Helms 每肌群週總組數：起始（MEV附近）→ 上限（MRV前）
+// 每週 +2 組，線性波動直到減量週
+const HELMS_VOL = {
+  beginner:     {start:6,  maxSets:12, weekInc:2},
+  intermediate: {start:8,  maxSets:16, weekInc:2},
+  advanced:     {start:10, maxSets:18, weekInc:2}
+};
+
+const SPLITS = {
+  3:[
+    {name:'週一',type:'全身'},
+    {name:'週三',type:'全身'},
+    {name:'週五',type:'全身'}
+  ],
+  4:[
+    {name:'週一',type:'上肢'},
+    {name:'週二',type:'下肢'},
+    {name:'週四',type:'上肢'},
+    {name:'週五',type:'下肢'}
+  ],
+  5:[
+    {name:'週一',type:'上肢'},
+    {name:'週二',type:'下肢'},
+    {name:'週四',type:'上肢'},
+    {name:'週五',type:'下肢'},
+    {name:'週六',type:'上肢'}
+  ],
+  6:[
+    {name:'週一',type:'推'},
+    {name:'週二',type:'拉'},
+    {name:'週三',type:'腿'},
+    {name:'週四',type:'推'},
+    {name:'週五',type:'拉'},
+    {name:'週六',type:'腿'}
+  ]
+};
+
+// 各分割類型的目標肌群
+// 肩部拆成三個子肌群：delt_a（前三角）delt_m（中三角）delt_p（後三角）
+const SPLIT_MUSCLES = {
+  全身: ['quad','glute','ham','chest','back_v','back_h','delt_m','delt_p','tri','bi'],
+  上肢: ['chest','back_v','back_h','delt_m','delt_p','tri','bi'],
+  下肢: ['quad','glute','ham'],
+  推:   ['chest','delt_m','tri'],
+  拉:   ['back_v','back_h','delt_p','bi'],
+  腿:   ['quad','glute','ham']
+};
+
+const SPLIT_EX_LIMIT = {全身:5, 上肢:5, 下肢:4, 推:4, 拉:4, 腿:4};
+
+const PUSH_MUSCLES = new Set(['chest','delt_a','delt_m','tri']);
+const PULL_MUSCLES = new Set(['back_v','back_h','delt_p','bi']);
+
+// ── 動作資料庫（間接係數依 EMG 研究修正）──
+// preferredMode: 最適合的 DUP 模式（A=大重量複合 B=中等肌肥大 C=高次數孤立 AB=兩者皆宜）
+const EX_DB = {
+  // 下肢複合
+  squat:     {id:'squat',     name:'背蹲舉',        equip:'蹲舉架 + 槓鈴',   wk:'squat',      unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['quad'],              indirect:{glute:.5, ham:.3}, preferredMode:'A'},
+  frontsq:   {id:'frontsq',   name:'前蹲舉',         equip:'蹲舉架 + 槓鈴',   wk:'squat',      unit:'kg',  step:2.5, compound:true,  ok:['A','B'],     primary:['quad'],              indirect:{glute:.5, ham:.3}, advanced:true, preferredMode:'A'},
+  deadlift:  {id:'deadlift',  name:'傳統硬舉',       equip:'蹲舉架 + 槓鈴',   wk:'deadlift',   unit:'kg',  step:2.5, compound:true,  ok:['A','B'],     primary:['ham','glute'],       indirect:{quad:.5, back_h:.3}, preferredMode:'A'},
+  rdl:       {id:'rdl',       name:'羅馬尼亞硬舉',   equip:'槓鈴',            wk:'deadlift',   unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['ham','glute'],       indirect:{}},
+  lunge:     {id:'lunge',     name:'啞鈴弓步',       equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
+  // 下肢孤立
+  legpress:  {id:'legpress',  name:'腿推機',         equip:'插銷',            wk:'legpress',   unit:'格',  step:1,   compound:false, ok:['A','B','C'], primary:['quad'],              indirect:{glute:.3}, preferredMode:'B'},
+  legext:    {id:'legext',    name:'Leg Extension',  equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['quad'],              indirect:{}, preferredMode:'C'},
+  legcurl:   {id:'legcurl',   name:'Leg Curl',       equip:'掛片',            wk:'legcurl',    unit:'kg',  step:2.5, compound:false, ok:['B','C'],     primary:['ham'],               indirect:{}, preferredMode:'C'},
+  // 新增下肢動作
+  slrdl:     {id:'slrdl',     name:'單腳羅馬尼亞硬舉', equip:'啞鈴',          wk:'deadlift',   unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['ham','glute'],       indirect:{}, preferredMode:'B'},
+  goblet:    {id:'goblet',    name:'高腳杯深蹲',       equip:'啞鈴',          wk:'squat',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', beginnerOnly:true, maxWeight:20},
+  lateralsq: {id:'lateralsq', name:'側蹲',             equip:'啞鈴',          wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'C'},
+  beltsquat: {id:'beltsquat',  name:'腰帶深蹲（Belt Squat）', equip:'啞鈴 or 腰帶',  wk:'squat',      unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
+  pistol:    {id:'pistol',    name:'單腳蹲（Pistol）',  equip:'徒手 or 啞鈴', wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', advanced:true},
+  bulgarian: {id:'bulgarian', name:'後腳抬高蹲',         equip:'啞鈴',          wk:null,         unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
+  hipthrust: {id:'hipthrust', name:'臀推機',         equip:'掛片',            wk:null,         unit:'kg',  step:2.5, compound:false, ok:['B','C'],     primary:['glute'],             indirect:{ham:.3}, preferredMode:'C'},
+  // 上肢推複合
+  bench:     {id:'bench',     name:'槓鈴臥推',       equip:'蹲舉架 + 臥推椅', wk:'bench',      unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'A'},
+  dbbench:   {id:'dbbench',   name:'啞鈴臥推',       equip:'啞鈴 + 臥推椅',  wk:'bench',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'B'},
+  ohp:       {id:'ohp',       name:'槓鈴肩推',       equip:'蹲舉架',          wk:'ohp',        unit:'kg',  step:2.5, compound:true,  ok:['A','B'],     primary:['delt_m','delt_a'],   indirect:{tri:.5}, preferredMode:'A'},
+  dbohp:     {id:'dbohp',     name:'啞鈴肩推',       equip:'啞鈴',            wk:'ohp',        unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['delt_m','delt_a'],   indirect:{tri:.5}, preferredMode:'AB'},
+  cgbench:   {id:'cgbench',   name:'窄握臥推',       equip:'蹲舉架',          wk:'bench',      unit:'kg',  step:2.5, compound:false, ok:['A','B','C'], primary:['tri'],               indirect:{chest:.3}, preferredMode:'B'},
+  // 上肢推孤立
+  chestpress:{id:'chestpress',name:'胸推機',         equip:'插銷',            wk:'chestpress', unit:'格',  step:1,   compound:false, ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'B'},
+  fly:       {id:'fly',       name:'飛鳥機台',       equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['chest'],             indirect:{}, preferredMode:'C'},
+  cablefly:  {id:'cablefly',  name:'大飛鳥',         equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['chest'],             indirect:{}, preferredMode:'C'},
+  // 中三角孤立（唯一有效直接訓練中三角的動作）
+  lateral:   {id:'lateral',   name:'啞鈴側平舉',     equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['B','C'],     primary:['delt_m'],            indirect:{}, preferredMode:'C'},
+  // 三頭孤立
+  overext:   {id:'overext',   name:'過頭三頭伸展',   equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['C'],         primary:['tri'],               indirect:{}, preferredMode:'C'},
+  dips:      {id:'dips',      name:'撐體 Dips',      equip:'單槓',            wk:null,         unit:'自重',step:0,   compound:false, ok:['A','B','C'], primary:['tri'],               indirect:{chest:.3}, preferredMode:'B'},
+  // 上肢拉複合
+  pulldown:  {id:'pulldown',  name:'下拉',           equip:'插銷',            wk:'pulldown',   unit:'格',  step:1,   compound:true,  ok:['A','B','C'], primary:['back_v'],            indirect:{bi:.5, delt_p:.3}, preferredMode:'A'},
+  pullup:    {id:'pullup',    name:'引體向上',       equip:'單槓',            wk:'pullup',     unit:'下',  step:1,   compound:true,  ok:['A','B'],     primary:['back_v'],            indirect:{bi:.5, delt_p:.3}, preferredMode:'AB'},
+  asst_pu:   {id:'asst_pu',   name:'輔助引體向上',   equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:true,  ok:['A','B','C'], primary:['back_v'],            indirect:{bi:.5, delt_p:.3}, preferredMode:'B'},
+  seatedrow: {id:'seatedrow', name:'坐姿划船',       equip:'插銷',            wk:'seatedrow',  unit:'格',  step:1,   compound:true,  ok:['A','B','C'], primary:['back_h'],            indirect:{bi:.5, delt_p:.5}, preferredMode:'A'},
+  trow:      {id:'trow',      name:'T字划船',        equip:'掛片',            wk:null,         unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['back_h'],            indirect:{bi:.5, delt_p:.5}, preferredMode:'B'},
+  bbrow:     {id:'bbrow',     name:'槓鈴划船',       equip:'槓鈴',            wk:'pulldown',   unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['back_h'],            indirect:{bi:.5, delt_p:.5}, preferredMode:'AB'},
+  // 上肢拉孤立
+  dbcurl:    {id:'dbcurl',    name:'啞鈴二頭彎舉',   equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['A','B','C'], primary:['bi'],                indirect:{}, preferredMode:'C'},
+  bbcurl:    {id:'bbcurl',    name:'槓鈴二頭彎舉',   equip:'槓鈴',            wk:null,         unit:'kg',  step:2.5, compound:false, ok:['A','B','C'], primary:['bi'],                indirect:{}, preferredMode:'C'}
+};
+
+// ── 各肌群 MEV / MRV（直接組數/週）──
+// delt_a MEV=0：臥推和肩推的間接量已足夠，不需要直接訓練
+// ── 動作間重量換算係數 ──
+// 格式：WEIGHT_CONVERT[fromId][toId] = 換算函數(sourceWeight)
+// 換算依據：雙側→單側係數、機器補償、穩定性需求差異
+const WEIGHT_CONVERT = {
+  // 槓鈴臥推 → 其他胸動作
+  bench: {
+    dbbench:   w => Math.round(w * 0.40 / 2) * 2,      // 雙側×0.8÷2=單手×0.4，四捨五入到2
+    chestpress:w => Math.round(w * 0.90 / 1) * 1,      // 機器接近1:1稍減，取整格
+    fly:       w => null,  // 孤立動作差異太大，不換算
+    cablefly:  w => null,
+  },
+  // 啞鈴臥推 → 其他
+  dbbench: {
+    bench:     w => Math.round(w * 2 / 1.15 / 2.5) * 2.5,  // 單手×2÷1.15≈槓鈴
+    chestpress:w => Math.round(w * 2 * 0.90 / 1) * 1,
+  },
+  // 槓鈴肩推 → 啞鈴肩推（單手）
+  ohp: {
+    dbohp:     w => Math.round(w * 0.35 / 2) * 2,      // 單手 ≈ 總重×0.35
+  },
+  dbohp: {
+    ohp:       w => Math.round(w * 2 / 0.35 / 0.35 / 2.5) * 2.5,
+  },
+  // 傳統硬舉 → 其他腿後動作
+  deadlift: {
+    rdl:       w => Math.round(w * 0.85 / 2.5) * 2.5,  // RDL ≈ 85%
+    slrdl:     w => Math.round(w * 0.30 / 2) * 2,      // 單腳 ≈ 30%（單手啞鈴）
+  },
+  rdl: {
+    deadlift:  w => Math.round(w / 0.85 / 2.5) * 2.5,
+    slrdl:     w => Math.round(w * 0.35 / 2) * 2,
+  },
+  slrdl: {
+    rdl:       w => Math.round(w / 0.35 / 2.5) * 2.5,
+    deadlift:  w => Math.round(w / 0.30 / 2.5) * 2.5,
+  },
+  // 背蹲舉 → 其他股四頭動作
+  squat: {
+    legpress:  w => Math.round(w * 2.0 / 1) * 1,
+    goblet:    w => Math.round(w * 0.25 / 2) * 2,
+    lunge:     w => Math.round(w * 0.30 / 2) * 2,
+    bulgarian: w => Math.round(w * 0.35 / 2) * 2,
+    beltsquat: w => Math.round(w * 0.90 / 2.5) * 2.5,  // 腰帶深蹲接近槓鈴深蹲
+  },
+  beltsquat: {
+    squat:     w => Math.round(w / 0.90 / 2.5) * 2.5,
+    legpress:  w => Math.round(w * 2.0 / 0.90 / 1) * 1,
+  },
+  legpress: {
+    squat:     w => Math.round(w * 0.50 / 2.5) * 2.5,
+  },
+  // 下拉 → 引體向上
+  pulldown: {
+    pullup:    w => null,   // 需要體重資訊，不自動換算
+    asst_pu:   w => null,   // 輔助引體需要知道體重，不換算
+  },
+  // 坐姿划船 → 其他背水平
+  seatedrow: {
+    trow:      w => Math.round(w * 0.85 / 2.5) * 2.5,  // T字划船接近1:1稍低
+    bbrow:     w => Math.round(w * 0.80 / 2.5) * 2.5,  // 槓鈴划船稍低（穩定性）
+  },
+  trow: {
+    seatedrow: w => Math.round(w / 0.85 / 1) * 1,
+    bbrow:     w => Math.round(w * 0.95 / 2.5) * 2.5,
+  },
+};
+
+function getConvertedWeight(fromId, toId, sourceWeight) {
+  if (!sourceWeight) return null;
+  const converter = WEIGHT_CONVERT[fromId]?.[toId];
+  if (!converter) return null;
+  const result = converter(sourceWeight);
+  return result && result > 0 ? result : null;
+}
+
+// MEV/MRV 為直接+間接合計目標（RP 框架，10–12 組為一般肌群 MEV 基準）
+const MUSCLE_MEV = {
+  quad:10,   glute:8,   ham:10,
+  chest:10,  back_v:10, back_h:10,
+  delt_a:0,  delt_m:8,  delt_p:6,
+  tri:10,    bi:10
+};
+// MRV 依辦公室工作者族群調降（壓力/睡眠因素，約為競技標準的 75–80%）
+const MUSCLE_MRV = {
+  quad:16,   glute:16,  ham:16,
+  chest:18,  back_v:16, back_h:16,
+  delt_a:10, delt_m:16, delt_p:14,
+  tri:14,    bi:16
+};
+const MUSCLE_NAME = {
+  quad:'股四頭', glute:'臀大肌', ham:'腿後',
+  chest:'胸',   back_v:'背垂直', back_h:'背水平',
+  delt_a:'前三角', delt_m:'中三角', delt_p:'後三角',
+  tri:'三頭',   bi:'二頭'
+};
+// 主畫面顯示用的精簡肌群清單（避免資訊過多）
+const DISPLAY_MUSCLES = {
+  全身: ['quad','chest','back_v','back_h','delt_m'],
+  上肢: ['chest','back_v','back_h','delt_m','delt_p'],
+  下肢: ['quad','glute','ham'],
+  推:   ['chest','delt_m','tri'],
+  拉:   ['back_v','back_h','delt_p'],
+  腿:   ['quad','glute','ham']
+};
+
+// ── MEV→MRV 遞增（Helms 邏輯，週總組數層，不再用 per-exercise RP 邏輯）──
+// 實際組數分配由 getWeekSets() 計算後反推每動作
+const MESO_DEF   = {beginner:5, intermediate:4, advanced:3};
+const GOAL_LBL   = {strength:'肌力提升', hypertrophy:'肌肥大', both:'兩者兼顧'};
+const LEVEL_LBL  = {beginner:'初階', intermediate:'中階', advanced:'進階'};
+const DELOAD_LBL = {volume:'降量型', intensity:'降強度型', active:'主動恢復型'};
+const SPLIT_LBL  = {3:'全身訓練 × 3', 4:'上下肢分割 × 2', 5:'上肢 × 3 + 下肢 × 2', 6:'推拉腿 PPL × 2'};
+
+// 計算本週每個複合動作應該做幾組（Helms 線性波動）
+// 週總組數 = start + (week-1) * weekInc，上限 maxSets
+// 每動作組數 = 週總組數 / 複合動作數（四捨五入，最少 2 組）
+// 減量週：取最後訓練週組數 × 50%
+function getWeekSets(week, numCompounds) {
+  const cfg = HELMS_VOL[A.level||'beginner'];
+  const mw  = getMesoWeeks();
+  const isDeload = week > mw;
+  if (isDeload) {
+    // 減量週：最後訓練週的組數 × 50%
+    const lastWeekTotal = Math.min(cfg.start + (mw - 1) * cfg.weekInc, cfg.maxSets);
+    const lastPerEx = Math.max(2, Math.round(lastWeekTotal / Math.max(1, numCompounds)));
+    return Math.max(1, Math.round(lastPerEx * 0.5));
+  }
+  const weekTotal = Math.min(cfg.start + (week - 1) * cfg.weekInc, cfg.maxSets);
+  return Math.max(2, Math.round(weekTotal / Math.max(1, numCompounds)));
+}
+
+// 本週建議 RIR 目標（Helms：第1週輕鬆 RIR 3–4，逐週下降到最後一週 RIR 0–1）
+function getWeekRIR(week) {
+  const mw = getMesoWeeks();
+  // 線性從 3.5 降到 0.5
+  const rir = 3.5 - (week - 1) * (3.0 / Math.max(1, mw - 1));
+  return Math.max(0.5, Math.round(rir * 2) / 2);  // 最小 0.5，以 0.5 為單位
+}
+
+// ── STATE ──
+const STORAGE_KEY = 'yh_training_v30';
+let A = {
+  goal:null, level:null, gender:null, age:null, days:null, bodyWeight:null,
+  meso:'auto', deload:'volume', frontSquat:false,
+  weights:{squat:null,legpress:null,legext:null,legcurl:null,deadlift:null,
+           bench:null,chestpress:null,ohp:null,pulldown:null,seatedrow:null,pullup:null}
+};
+let S = {currentWeek:1, completedDays:{}, logs:{}, adj:{}, progOverrides:{}, mesocycle:1, exOverrides:{}};
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({A,S})); } catch(e){}
+  syncToSupabase();
+}
+function load() {
+  try {
+    for (const k of [STORAGE_KEY,'yh_training_v28','yh_training_v27','yh_training_v26','yh_training_v25','yh_training_v24','yh_training_v23','yh_training_v22','yh_training_v21','yh_training_v20','yh_training_v19','yh_training_v18','yh_training_v17','yh_training_v16','yh_training_v15','yh_training_v14','yh_training_v13','yh_training_v12','yh_training_v11','yh_training_v10','yh_training_v9','yh_training_v8','yh_training_v7','yh_training_v6','yh_training_v5','yh_training_v4','yh_training_v3','yh_training_v2','yh_training_v1']) {
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const d = JSON.parse(raw);
+      if (d.A) A = {...A, ...d.A};
+      if (d.S) S = {...S, ...d.S};
+      if (A.goal) return true;
+    }
+    return false;
+  } catch(e) { return false; }
+}
+
+// ══ 組數計算核心（Helms 版，改用 getWeekSets）══
+
+// ══ 動作選擇引擎（Helms 版）══
+function pickExercises(splitType, week, dayKey) {
+  const targets  = SPLIT_MUSCLES[splitType] || [];
+  const maxEx    = SPLIT_EX_LIMIT[splitType] || 4;
+  const cfg      = GOAL_CONFIG[A.goal||'both'];
+  const overrides = (dayKey && S.exOverrides && S.exOverrides[dayKey]) || {};
+
+  const pool = Object.values(EX_DB).filter(e => {
+    if (e.advanced && !A.frontSquat) return false;
+    if (!(e.primary||[]).some(m => targets.includes(m))) return false;
+    if (e.beginnerOnly && A.level !== 'beginner') return false;
+    if (e.maxWeight && e.wk) {
+      const rm1 = A.weights[e.wk] ? Math.round(A.weights[e.wk]*1.33) : null;
+      const suggested = rm1 ? Math.round(rm1*cfg.pct/e.step)*e.step : 0;
+      if (suggested > e.maxWeight) return false;
+    }
+    if (e.id === 'pullup') {
+      const puCount = A.weights['pullup'];
+      if (!puCount || puCount <= 0) return false;
+    }
+    return true;
+  });
+
+  const selected = [];
+  const usedIds  = new Set();
+  const acc      = {};
+
+  function addEx(ex) {
+    const slotIdx = selected.length;
+    const overrideId = overrides[slotIdx];
+    const finalEx = (overrideId && EX_DB[overrideId] && !usedIds.has(overrideId))
+      ? EX_DB[overrideId] : ex;
+    const compoundIndex = finalEx.compound
+      ? selected.filter(e=>e.compound).length : -1;
+    selected.push({...finalEx, slotIdx, compoundIndex});
+    usedIds.add(finalEx.id);
+    // 用暫估 3 組計算 acc（後面會用 effectiveSets 覆蓋）
+    const s = 3;
+    (finalEx.primary||[]).forEach(m => { acc[m]=(acc[m]||0)+s; });
+    Object.entries(finalEx.indirect||{}).forEach(([m,c]) => { acc[m]=(acc[m]||0)+s*c; });
+  }
+
+  function coversPush(ex) { return (ex.primary||[]).some(m=>PUSH_MUSCLES.has(m)); }
+  function coversPull(ex)  { return (ex.primary||[]).some(m=>PULL_MUSCLES.has(m)); }
+  function scoreEx(ex) {
+    return (ex.primary||[]).filter(m=>targets.includes(m)).length*2
+         + (A.weights[ex.wk]?1:0)
+         + (ex.compound?1:0);
+  }
+
+  // ── Pass 1：複合動作 ──
+  const isUpper = ['上肢','全身','推','拉'].includes(splitType);
+  const MAX_COMPOUNDS = (splitType==='下肢'||splitType==='腿') ? 2 : 99;
+
+  if (isUpper && (splitType==='上肢'||splitType==='全身')) {
+    const pushC  = pool.filter(e=>e.compound&&coversPush(e)).sort((a,b)=>scoreEx(b)-scoreEx(a));
+    const pullVC = pool.filter(e=>e.compound&&(e.primary||[]).includes('back_v')).sort((a,b)=>scoreEx(b)-scoreEx(a));
+    const pullHC = pool.filter(e=>e.compound&&(e.primary||[]).includes('back_h')).sort((a,b)=>scoreEx(b)-scoreEx(a));
+    if (pushC.length) addEx(pushC[0]);
+    // 垂直拉優先（利於背部厚度與寬度均衡）
+    const pullFirst = pullVC.find(e=>!usedIds.has(e.id)) || pullHC.find(e=>!usedIds.has(e.id));
+    if (pullFirst) addEx(pullFirst);
+  }
+
+  const MUTEX_GROUPS = [
+    new Set(['squat','frontsq','goblet','lunge','bulgarian','lateralsq','pistol','beltsquat']),
+    new Set(['deadlift','rdl','slrdl']),
+  ];
+  function isMutexBlocked(exId) {
+    for (const group of MUTEX_GROUPS) {
+      if (!group.has(exId)) continue;
+      if (selected.some(s => group.has(s.id))) return true;
+    }
+    return false;
+  }
+
+  const remComp = pool.filter(e=>e.compound&&!usedIds.has(e.id)).sort((a,b)=>scoreEx(b)-scoreEx(a));
+  const selectedPrimaryMuscles = new Set(selected.flatMap(e=>e.primary||[]));
+  for (const ex of remComp) {
+    if (selected.length>=maxEx) break;
+    const currentCompounds = selected.filter(e=>e.compound).length;
+    if (currentCompounds >= MAX_COMPOUNDS) break;
+    const newM = (ex.primary||[]).filter(m=>targets.includes(m));
+    if (newM.every(m=>(acc[m]||0)>=12) && selected.length>=2) continue;
+    const fullyOverlap = newM.length > 0 &&
+      newM.every(m => selectedPrimaryMuscles.has(m)) &&
+      selected.some(s => (s.primary||[]).filter(m=>newM.includes(m)).length >= newM.length * 0.8);
+    if (fullyOverlap && selected.length >= 2) continue;
+    if (isMutexBlocked(ex.id)) continue;
+    addEx(ex);
+    newM.forEach(m => selectedPrimaryMuscles.add(m));
+  }
+
+  // ── Pass 2：孤立動作補強 ──
+  const underserved = targets.filter(m => {
+    if (m==='delt_a') return false;
+    const threshold = (m==='tri'||m==='bi') ? 0.4 : 0.7;
+    return (acc[m]||0) < (MUSCLE_MEV[m]||10) * threshold;
+  });
+  const isos = pool.filter(e =>
+    !e.compound && !usedIds.has(e.id) &&
+    (e.primary||[]).some(m=>underserved.includes(m))
+  ).sort((a,b) => {
+    const aGap = Math.max(...(a.primary||[]).filter(m=>underserved.includes(m))
+      .map(m => (MUSCLE_MEV[m]||10) - (acc[m]||0)), 0);
+    const bGap = Math.max(...(b.primary||[]).filter(m=>underserved.includes(m))
+      .map(m => (MUSCLE_MEV[m]||10) - (acc[m]||0)), 0);
+    if(bGap !== aGap) return bGap - aGap;
+    return (A.weights[b.wk]?1:0)-(A.weights[a.wk]?1:0);
+  });
+  for (const ex of isos) {
+    if (selected.length>=maxEx) break;
+    addEx(ex);
+  }
+
+  // ── 組數分配（Helms）──
+  // 複合動作：週總組數線性遞增，反推每動作組數
+  // 孤立動作：固定 3 組（不參與遞增，維持恢復能力）
+  const compounds  = selected.filter(e=>e.compound);
+  const compSets   = getWeekSets(week, compounds.length);  // 每個複合動作幾組
+  const ISO_SETS   = 3;
+
+  const finalExercises = selected.map(ex => ({
+    ...ex,
+    effectiveSets: ex.compound ? compSets : ISO_SETS
+  }));
+
+  const finalAcc = {};
+  finalExercises.forEach(ex => {
+    (ex.primary||[]).forEach(m=>{ finalAcc[m]=(finalAcc[m]||0)+ex.effectiveSets; });
+    Object.entries(ex.indirect||{}).forEach(([m,c])=>{ finalAcc[m]=(finalAcc[m]||0)+ex.effectiveSets*c; });
+  });
+
+  return {exercises:finalExercises, acc:finalAcc, compSets, cfg};
+}
+
+// ══ 重量計算 ══
+function getRM1(key) {
+  if (A.weights[key]) return Math.round(A.weights[key]*1.33);
+  // 沒有填參考重量時，嘗試從體重推算
+  const est = estimateWeightFromBW(key);
+  return est ? Math.round(est*1.33) : null;
+}
+
+// 從體重推算各動作的 10RM 估計值（無參考重量時的起始建議）
+// 依性別和年資調整倍率
+function estimateWeightFromBW(wk) {
+  const bw = A.bodyWeight;
+  if (!bw) return null;
+  const isMale = A.gender === 'male';
+  const level = A.level || 'beginner';
+  // 基礎倍率（男性初階，10RM / 體重）
+  const BASE = {
+    squat:    {male:{beginner:.60, intermediate:.85, advanced:1.10},
+               female:{beginner:.45, intermediate:.65, advanced:.85}},
+    deadlift: {male:{beginner:.80, intermediate:1.05, advanced:1.35},
+               female:{beginner:.55, intermediate:.75, advanced:1.00}},
+    bench:    {male:{beginner:.45, intermediate:.65, advanced:.85},
+               female:{beginner:.25, intermediate:.40, advanced:.55}},
+    ohp:      {male:{beginner:.25, intermediate:.38, advanced:.50},
+               female:{beginner:.15, intermediate:.23, advanced:.32}},
+    pulldown: {male:{beginner:.40, intermediate:.55, advanced:.70},
+               female:{beginner:.28, intermediate:.40, advanced:.55}},
+    seatedrow:{male:{beginner:.38, intermediate:.52, advanced:.68},
+               female:{beginner:.26, intermediate:.38, advanced:.52}},
+    legext:   {male:{beginner:.30, intermediate:.42, advanced:.55},
+               female:{beginner:.22, intermediate:.32, advanced:.42}},
+    legcurl:  {male:{beginner:.18, intermediate:.25, advanced:.32},
+               female:{beginner:.14, intermediate:.20, advanced:.28}},
+    legpress: null,  // 機器差異大，不推算
+    chestpress: null,
+  };
+  const g = isMale ? 'male' : 'female';
+  const ratios = BASE[wk];
+  if (!ratios) return null;
+  const ratio = ratios[g][level];
+  // 無條件捨去到最近的 2.5
+  return Math.floor(bw * ratio / 2.5) * 2.5;
+}
+function getSW(ex, pct, basePct) {
+  if (!ex.wk||ex.unit==='下'||ex.unit==='自重') return null;
+  const r1=getRM1(ex.wk); if(!r1) return null;
+  const w=Math.round(r1*pct/ex.step)*ex.step;
+  // 如果有 basePct（調整後），確保建議重量跟基準有差異
+  if (basePct !== undefined && basePct !== pct) {
+    const wBase = Math.round(r1*basePct/ex.step)*ex.step;
+    if (w === wBase) {
+      // rounding 後相同，手動加減一個 step
+      return pct < basePct
+        ? Math.max(ex.step, wBase - ex.step)
+        : wBase + ex.step;
+    }
+  }
+  return w>0?w:null;
+}
+function getMesoWeeks() { return A.meso==='auto'?MESO_DEF[A.level||'intermediate']:parseInt(A.meso); }
+
+// ══ ONBOARDING ══
+function obStep(n) {
+  for(let i=1;i<=7;i++) document.getElementById('ob-s'+i).style.display=i===n?'block':'none';
+  document.getElementById('ob-prog').style.width=(n/7*100)+'%';
+}
+function obNext(n) { if(n===3) buildSplitPrev(); if(n===5) buildSummary(); obStep(n+1); }
+function pick(el) {
+  const f=el.dataset.f;
+  document.querySelectorAll('[data-f="'+f+'"]').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); A[f]=el.dataset.v;
+  if(f==='goal') document.getElementById('ob-n1').disabled=false;
+  if(f==='level') document.getElementById('ob-n2').disabled=false;
+}
+function pickMeso(el) {
+  document.querySelectorAll('[data-f="meso"]').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); A.meso=el.dataset.v;
+}
+function chk3() {
+  const g=document.getElementById('ob-gender').value, a=document.getElementById('ob-age').value;
+  if(g) A.gender=g; if(a) A.age=parseInt(a);
+  document.getElementById('ob-n3').disabled=!(g&&a&&parseInt(a)>=14&&A.days);
+}
+function buildSplitPrev() {
+  if(!A.days) return;
+  const d=parseInt(A.days), split=SPLITS[d]||SPLITS[3];
+  const cfg=GOAL_CONFIG[A.goal||'both'];
+  let h='<div class="split-prev">';
+  split.forEach(day=>{
+    const {exercises}=pickExercises(day.type, 1);
+    h+=`<div class="split-row">
+      <span style="font-size:12px;color:var(--text3)">${day.name}</span>
+      <span style="font-size:13px">${day.type}<span style="color:var(--text3);font-size:11px;margin-left:6px">${exercises.length} 個動作</span></span>
+      <span class="badge badge-b">${cfg.desc}</span>
+    </div>`;
+  });
+  if(d===6) h+=`<div style="padding:8px 14px;font-size:12px;color:var(--warning);border-top:1px solid var(--border)">建議在週三或週四安排一天休息</div>`;
+  h+='</div>';
+  document.getElementById('ob-split-prev').innerHTML=h;
+}
+function buildSummary() {
+  const mw=getMesoWeeks();
+  const wids=[
+    ['wr-squat','背蹲舉'],['wr-deadlift','傳統硬舉'],
+    ['wr-legpress','腿推機'],['wr-legext','Leg Extension'],['wr-legcurl','Leg Curl'],
+    ['wr-bench','槓鈴胸推'],['wr-ohp','槓鈴肩推'],
+    ['wr-pulldown','下拉'],['wr-seatedrow','坐姿划船'],['wr-pullup','引體向上']
+  ];
+  let wh=''; let hw=false;
+  wids.forEach(([id,lbl])=>{ const v=document.getElementById(id)?.value; if(v){wh+=`<div class="sum-row"><span class="sum-k">${lbl}</span><span class="sum-v">${v}</span></div>`;hw=true}});
+  if(!hw) wh='<div class="sum-row"><span class="sum-k" style="color:var(--text3)">暫無（訓練後自動校正）</span></div>';
+  A.frontSquat=document.getElementById('ob-frontsq').checked;
+  document.getElementById('ob-summary').innerHTML=`
+    <div class="sum-sec"><div class="sum-sec-t">目標與程度</div>
+      <div class="sum-row"><span class="sum-k">目標</span><span class="sum-v">${GOAL_LBL[A.goal]||'—'}</span></div>
+      <div class="sum-row"><span class="sum-k">年資</span><span class="sum-v">${LEVEL_LBL[A.level]||'—'}</span></div>
+      <div class="sum-row"><span class="sum-k">性別 / 年齡</span><span class="sum-v">${A.gender==='male'?'男':'女'} / ${A.age||'—'} 歲</span></div>
+    </div>
+    <div class="sum-sec"><div class="sum-sec-t">課表安排</div>
+      <div class="sum-row"><span class="sum-k">每週天數</span><span class="sum-v">${A.days} 天</span></div>
+      <div class="sum-row"><span class="sum-k">分割方式</span><span class="sum-v">${SPLIT_LBL[A.days]||'—'}</span></div>
+      <div class="sum-row"><span class="sum-k">Mesocycle 長度</span><span class="sum-v">${mw} 週</span></div>
+      <div class="sum-row"><span class="sum-k">Deload 方式</span><span class="sum-v">${DELOAD_LBL[A.deload]||'—'}</span></div>
+    </div>
+    <div class="sum-sec"><div class="sum-sec-t">參考重量</div>${wh}</div>`;
+}
+function finishOnboard() {
+  // 直接欄位
+  const wids=[
+    ['wr-squat','squat'],['wr-deadlift','deadlift'],
+    ['wr-legpress','legpress'],['wr-legext','legext'],['wr-legcurl','legcurl'],
+    ['wr-bench','bench'],['wr-ohp','ohp'],
+    ['wr-pulldown','pulldown'],['wr-seatedrow','seatedrow'],['wr-pullup','pullup']
+  ];
+  wids.forEach(([id,key])=>{ const v=document.getElementById(id)?.value; if(v) A.weights[key]=parseFloat(v); });
+  // 從填入欄位換算未填的動作
+  // seatedrow → pulldown（若下拉沒填）
+  if (!A.weights.pulldown && A.weights.seatedrow) {
+    A.weights.pulldown = A.weights.seatedrow;
+  }
+  // 深蹲 → RDL（若未填）
+  if (!A.weights.deadlift && A.weights.squat) {
+    A.weights.deadlift = Math.round(A.weights.squat * 1.1 / 2.5) * 2.5;
+  }
+  // 胸推 → 肩推（若未填）
+  if (!A.weights.ohp && A.weights.bench) {
+    A.weights.ohp = Math.round(A.weights.bench * 0.60 / 2.5) * 2.5;
+  }
+  A.frontSquat=document.getElementById('ob-frontsq').checked;
+  const bwVal = document.getElementById('ob-bw')?.value;
+  if (bwVal) A.bodyWeight = parseFloat(bwVal);
+  S={currentWeek:1,completedDays:{},logs:{},adj:{},progOverrides:{},mesocycle:1,exOverrides:{}};
+  save(); goScreen('screen-home'); renderHome();
+}
+
+// ══ NAVIGATION ══
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ══ HOME ══
+function renderHome() {
+  const days=parseInt(A.days)||4, split=SPLITS[days]||SPLITS[4];
+  const mw=getMesoWeeks(), totalW=mw+1, week=S.currentWeek;
+  const cfg=GOAL_CONFIG[A.goal||'both'];
+  const rir=getWeekRIR(week);
+  document.getElementById('home-title').textContent='Mesocycle '+S.mesocycle;
+  document.getElementById('home-sub').textContent=GOAL_LBL[A.goal||'both']+'　·　'+LEVEL_LBL[A.level||'beginner']+'　·　'+days+' 天/週';
+  const doneDays=Object.keys(S.completedDays).filter(k=>k.startsWith(week+'_')).length;
+  const weekVol={};
+  split.forEach(d=>{
+    const {exercises}=pickExercises(d.type,week);
+    exercises.forEach(ex=>{
+      (ex.primary||[]).forEach(m=>{weekVol[m]=(weekVol[m]||0)+ex.effectiveSets;});
+      Object.entries(ex.indirect||{}).forEach(([m,c])=>{weekVol[m]=(weekVol[m]||0)+ex.effectiveSets*c;});
+    });
+  });
+  document.getElementById('home-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-lbl">目前週次</div><div class="stat-val">第 ${week} 週</div></div>
+    <div class="stat-card"><div class="stat-lbl">完成天數</div><div class="stat-val">${doneDays} / ${days}</div></div>
+    <div class="stat-card"><div class="stat-lbl">本週目標 RIR</div><div class="stat-val">${rir}</div></div>`;
+  const wn=document.getElementById('home-week-nav'); wn.innerHTML='';
+  for(let w=1;w<=totalW;w++){
+    const b=document.createElement('button');
+    b.className='wk-btn'+(w===week?' act':'')+(w===totalW?' deload':'');
+    b.textContent=w===totalW?'減量週':'第 '+w+' 週';
+    b.onclick=()=>{S.currentWeek=w;save();renderHome()};
+    wn.appendChild(b);
+  }
+  const dl=document.getElementById('home-day-list');
+  const parent=dl.parentNode;
+  parent.querySelectorAll('.home-notice').forEach(n=>n.remove());
+  const muscleOrder=['quad','ham','glute','chest','back_v','back_h','delt_m','delt_p','tri','bi'];
+  const dispM=muscleOrder.filter(m=>weekVol[m]>0);
+  const volHint=document.createElement('div');
+  volHint.className='notice home-notice';
+  volHint.style.lineHeight='1.9';
+  volHint.innerHTML='本週加權組數<br>'+dispM.map(m=>{
+    const v=Math.round((weekVol[m]||0)*10)/10;
+    const mev=MUSCLE_MEV[m]||10, mrv=MUSCLE_MRV[m]||20;
+    const color=v<mev?'var(--warning)':v>mrv*0.9?'var(--danger)':'var(--success)';
+    return `<span style="color:${color};margin-right:10px">${MUSCLE_NAME[m]} <strong>${v}</strong></span>`;
+  }).join('');
+  parent.insertBefore(volHint, dl);
+  if(days===6){
+    const rh=document.createElement('div');
+    rh.className='notice home-notice';
+    rh.style.color='var(--warning)';
+    rh.textContent='提醒：建議週三或週四安排休息日，避免連續訓練超過 3 天';
+    parent.insertBefore(rh, dl);
+  }
+  dl.innerHTML='';
+  const isDeload=week===totalW;
+  if(isDeload){
+    dl.innerHTML=`<div class="deload-box">
+      <div style="font-size:17px;font-weight:500;margin-bottom:.5rem">減量週</div>
+      所有動作重量維持不變<br>組數減少至上週的 50%<br>
+      <div style="font-size:12px;color:var(--text3);margin-top:.75rem">完成後進入 Mesocycle ${S.mesocycle+1}</div>
+    </div>
+    <div class="notice" style="margin-top:1rem;text-align:left">
+      <strong>減量週怎麼做</strong><br>
+      維持所有動作的重量不變，組數減少一半。<br>
+      目的是讓神經系統和肌肉完全恢復，為下一個週期建立更高的訓練量基礎。<br>
+      減量週後你會感覺比平時更有力量，這是「超補償效應」，是進步最快的時機。
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:10px" onclick="showMesoReview()">完成減量週，查看課表建議 →</button>`;
+    return;
+  }
+  split.forEach((d,i)=>{
+    const {exercises,compSets}=pickExercises(d.type,week);
+    const key=week+'_'+i, done=!!S.completedDays[key];
+    const exSetsList=exercises.map(e=>e.effectiveSets);
+    const minS=Math.min(...exSetsList), maxS=Math.max(...exSetsList);
+    const setsLabel=minS===maxS?`${minS}組`:`${minS}–${maxS}組`;
+    const card=document.createElement('div');
+    card.className='day-card'+(done?' done':'');
+    card.innerHTML=`
+      <div>
+        <div class="day-name">${d.name}　${d.type}</div>
+        <div class="day-meta">${cfg.desc}　·　${exercises.length} 個動作　·　${setsLabel}　·　RIR ${rir}</div>
+      </div>
+      <span class="badge ${done?'badge-done':'badge-b'}">${done?'已完成':'進行中'}</span>`;
+    card.onclick=()=>openSession(i);
+    dl.appendChild(card);
+  });
+}
+
+// ══ SESSION ══
+let currentSessionDay=null;
+function openSession(dayIdx) {
+  const days=parseInt(A.days)||4, split=SPLITS[days]||SPLITS[4];
+  const day=split[dayIdx], week=S.currentWeek;
+  currentSessionDay=dayIdx;
+  const cfg=GOAL_CONFIG[A.goal||'both'];
+  const adjKey=week+'_'+dayIdx;
+  const adj=S.adj[adjKey]||0;
+  const {exercises,compSets,acc}=pickExercises(day.type,week,adjKey);
+  const pct=cfg.pct*(1+adj*0.05);
+  const rir=getWeekRIR(week);
+  document.getElementById('sess-title').textContent=day.name+'　'+day.type;
+  document.getElementById('sess-sub').textContent=cfg.desc+'　·　第 '+week+' 週';
+  const sessSetsList=exercises.map(e=>e.effectiveSets);
+  const sessMinS=Math.min(...sessSetsList), sessMaxS=Math.max(...sessSetsList);
+  const sessSetsLabel=sessMinS===sessMaxS?String(sessMinS):`${sessMinS}–${sessMaxS}`;
+  document.getElementById('sess-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-lbl">目標</div><div class="stat-val" style="font-size:13px">${cfg.desc}</div></div>
+    <div class="stat-card"><div class="stat-lbl">動作數</div><div class="stat-val">${exercises.length} 個</div></div>
+    <div class="stat-card"><div class="stat-lbl">組 × 次</div><div class="stat-val">${sessSetsLabel} × ${cfg.range[0]}–${cfg.range[1]}</div></div>
+    <div class="stat-card"><div class="stat-lbl">目標 RIR</div><div class="stat-val">${rir}</div></div>`;
+  document.getElementById('sess-adj-note').textContent=
+    adj===0?`基準 ${Math.round(cfg.pct*100)}%`:adj>0?`▲ +${Math.round(adj*5)}%`:`▼ ${Math.round(adj*5)}%`;
+  const list=document.getElementById('sess-ex-list'); list.innerHTML='';
+  const targets=(SPLIT_MUSCLES[day.type]||[]).filter(m=>m!=='delt_a');
+  const freqMap={全身:3,上肢:parseInt(A.days)<=4?2:3,下肢:2,推:2,拉:2,腿:2};
+  const freq=freqMap[day.type]||2;
+  const volHint=document.createElement('div');
+  volHint.className='notice';
+  const volParts=targets.map(m=>{
+    const v=Math.round((acc[m]||0)*10)/10;
+    const mev=MUSCLE_MEV[m]||10;
+    const threshold=mev/freq;
+    const mrv=MUSCLE_MRV[m]||20;
+    const mrvThreshold=mrv/freq;
+    const color=v===0?'var(--text3)':v<threshold?'var(--warning)':v>mrvThreshold*0.9?'var(--danger)':'var(--success)';
+    return `<span style="color:${color}">${MUSCLE_NAME[m]} <strong>${v>0?v:'—'}</strong></span>`;
+  });
+  volHint.innerHTML='本日加權組數　'+volParts.join('　');
+  list.appendChild(volHint);
+  exercises.forEach((ex,ei)=>{
+    // 上肢日多複合強度衰減：第N個複合 × (1 - (N-1)*0.03)
+    const isUpperSplit = ['上肢','全身','推','拉'].includes(day.type);
+    const decayFactor = (isUpperSplit && ex.compound && ex.compoundIndex > 0)
+      ? 1 - ex.compoundIndex * 0.03 : 1;
+    const finalPct = pct * decayFactor;
+    const basePct  = cfg.pct * decayFactor;
+    const sw=getSW(ex, finalPct, adj!==0 ? basePct : undefined);
+    const swD=sw?sw+' '+ex.unit:'—';
+    const exSets=ex.effectiveSets;
+    const primaryStr=(ex.primary||[]).map(m=>MUSCLE_NAME[m]).join('、');
+    const indirectStr=Object.entries(ex.indirect||{})
+      .filter(([,c])=>c>0).map(([m,c])=>`${MUSCLE_NAME[m]}×${c}`).join('、');
+    const SWAP_MUTEX = [
+      new Set(['squat','frontsq','goblet','lunge','bulgarian','lateralsq','pistol','beltsquat']),
+      new Set(['deadlift','rdl','slrdl']),
+    ];
+    function inSameSwapGroup(id1, id2) {
+      for (const g of SWAP_MUTEX) {
+        const has1 = g.has(id1), has2 = g.has(id2);
+        if (has1 !== has2) return false;
+      }
+      return true;
+    }
+    const altPool=Object.values(EX_DB).filter(e=>
+      e.id!==ex.id&&
+      (e.primary||[]).some(m=>(ex.primary||[]).includes(m))&&
+      !(e.advanced&&!A.frontSquat)&&
+      inSameSwapGroup(ex.id, e.id)
+    ).slice(0,4);
+    const altHtml=altPool.map(alt=>{
+      const overrideId = S.exOverrides?.[adjKey]?.[ei];
+      const originalId = overrideId ? overrideId : ex.id;
+      const originalEx = EX_DB[originalId] || ex;
+      const srcWeight = originalEx.wk ? (A.weights[originalEx.wk]||null) : null;
+      const convertedW = srcWeight ? getConvertedWeight(originalId, alt.id, srcWeight) : null;
+      const altSW = convertedW
+        ? Math.round(convertedW * 1.33 * cfg.pct / (alt.step||2.5)) * (alt.step||2.5)
+        : (alt.wk ? getSW(alt, cfg.pct) : null);
+      const altWeightStr = altSW ? `　<span style="color:var(--success);font-size:11px">建議 ${altSW} ${alt.unit}</span>` : '';
+      return `<label style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">
+        <input type="radio" name="swap_${adjKey}_${ei}" value="${alt.id}"
+          ${(S.exOverrides&&S.exOverrides[adjKey]&&S.exOverrides[adjKey][ei])===alt.id?'checked':''}>
+        <span><strong>${alt.name}</strong>　<span style="color:var(--text3);font-size:11px">${alt.equip}</span>${altWeightStr}</span>
+      </label>`;
+    }).join('');
+    const card=document.createElement('div'); card.className='ex-card';
+    let setsHtml='';
+    for(let s=1;s<=exSets;s++){
+      const lk=adjKey+'_'+ex.id+'_'+s, lg=S.logs[lk]||{};
+      setsHtml+=`<tr>
+        <td class="set-num">${s}</td>
+        <td class="sug">${swD}</td>
+        <td><input class="si" type="number" min="0" step="0.5" placeholder="${sw||'—'}" value="${lg.weight||''}" oninput="logSet('${adjKey}','${ex.id}',${s},'weight',this.value)"></td>
+        <td><input class="si" type="number" min="0" step="1" placeholder="${cfg.range[0]}–${cfg.range[1]}" value="${lg.reps||''}" oninput="logSet('${adjKey}','${ex.id}',${s},'reps',this.value)"></td>
+        <td><select class="ri" onchange="logSet('${adjKey}','${ex.id}',${s},'rir',this.value)">
+          <option value="">—</option>
+          ${[0,1,2,3,4].map(r=>`<option value="${r}"${lg.rir==r?' selected':''}>RIR ${r}</option>`).join('')}
+        </select></td>
+      </tr>`;
+    }
+    card.innerHTML=`
+      <div class="ex-hd" onclick="toggleCard(this)">
+        <div>
+          <div class="ex-nm">${ex.name}</div>
+          <div class="ex-mt">${ex.equip}　·　主：${primaryStr}${indirectStr?'　間：'+indirectStr:''}</div>
+        </div>
+        <span class="chevron ${ei===0?'open':''}">▾</span>
+      </div>
+      <div class="ex-bd" style="${ei===0?'':'display:none'}">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:.5rem;font-family:'DM Mono',monospace">
+          建議重量 ${swD}　·　${exSets} 組 × ${cfg.range[0]}–${cfg.range[1]} 下　·　目標 RIR ${rir}
+        </div>
+        <table class="set-tbl">
+          <thead><tr>
+            <th style="width:20px">組</th><th style="width:60px">建議</th>
+            <th>重量</th><th>次數</th><th title="還能再做幾下：0=力竭 1=還能1下 2=還能2下 3+=輕鬆">RIR ⓘ</th>
+          </tr></thead>
+          <tbody>${setsHtml}</tbody>
+        </table>
+        ${altPool.length?`
+        <details style="margin-top:.75rem">
+          <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:4px 0;user-select:none">
+            替換動作 <span style="color:var(--text3)">(${altPool.length} 個備選)</span>
+          </summary>
+          <div style="padding:.5rem 0">
+            <label style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">
+              <input type="radio" name="swap_${adjKey}_${ei}" value=""
+                ${!(S.exOverrides&&S.exOverrides[adjKey]&&S.exOverrides[adjKey][ei])?'checked':''}>
+              <span><strong>${ex.name}</strong>　<span style="color:var(--text3);font-size:11px">目前選擇</span></span>
+            </label>
+            ${altHtml}
+            <button onclick="applySwap('${adjKey}',${ei})" style="margin-top:.625rem;width:100%;padding:7px;border:1px solid var(--accent);border-radius:var(--r-sm);background:var(--accent);color:var(--accent-fg);font-size:13px;font-family:inherit;cursor:pointer">確認替換</button>
+          </div>
+        </details>`:''
+        }
+      </div>`;
+    list.appendChild(card);
+  });
+  goScreen('screen-session');
+}
+
+function sessAdj(d) {
+  const key=S.currentWeek+'_'+currentSessionDay;
+  S.adj[key]=(S.adj[key]||0)+d;
+  S.adj[key]=Math.max(-2,Math.min(2,S.adj[key]));
+  // 記錄目前哪些卡片是展開的
+  const openCards = [];
+  document.querySelectorAll('#sess-ex-list .ex-card').forEach((card,i) => {
+    const bd = card.querySelector('.ex-bd');
+    if (bd && bd.style.display !== 'none') openCards.push(i);
+  });
+  // 記錄 details 展開狀態
+  const openDetails = [];
+  document.querySelectorAll('#sess-ex-list details').forEach((d,i) => {
+    if (d.open) openDetails.push(i);
+  });
+  save();
+  openSession(currentSessionDay);
+  // 恢復展開狀態
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#sess-ex-list .ex-card').forEach((card,i) => {
+      const bd = card.querySelector('.ex-bd');
+      const cv = card.querySelector('.chevron');
+      if (openCards.includes(i)) {
+        if (bd) bd.style.display = 'block';
+        if (cv) cv.classList.add('open');
+      } else {
+        if (bd) bd.style.display = 'none';
+        if (cv) cv.classList.remove('open');
+      }
+    });
+    document.querySelectorAll('#sess-ex-list details').forEach((d,i) => {
+      if (openDetails.includes(i)) d.open = true;
+    });
+  });
+}
+function logSet(dk,exId,sn,field,val) {
+  const k=dk+'_'+exId+'_'+sn;
+  if(!S.logs[k]) S.logs[k]={};
+  S.logs[k][field]=val; save();
+}
+function toggleCard(hd) {
+  const bd=hd.nextElementSibling, cv=hd.querySelector('.chevron');
+  const op=bd.style.display!=='none';
+  bd.style.display=op?'none':'block'; cv.classList.toggle('open',!op);
+}
+function finishSession() {
+  const key=S.currentWeek+'_'+currentSessionDay;
+  S.completedDays[key]=true; save();
+  const days=parseInt(A.days)||4;
+  const allDone=Object.keys(S.completedDays).filter(k=>k.startsWith(S.currentWeek+'_')).length>=days;
+  goScreen('screen-home'); renderHome();
+  if(allDone) setTimeout(()=>{renderProgress();goScreen('screen-progress')},400);
+}
+function skipSession() { goScreen('screen-home'); renderHome(); }
+
+function applySwap(dayKey, slotIdx) {
+  const radios=document.querySelectorAll(`input[name="swap_${dayKey}_${slotIdx}"]`);
+  let selected='';
+  radios.forEach(r=>{ if(r.checked) selected=r.value; });
+  if(!S.exOverrides) S.exOverrides={};
+  if(!S.exOverrides[dayKey]) S.exOverrides[dayKey]={};
+  if(selected){ S.exOverrides[dayKey][slotIdx]=selected; }
+  else { delete S.exOverrides[dayKey][slotIdx]; }
+  // 記錄展開狀態
+  const openCards=[];
+  document.querySelectorAll('#sess-ex-list .ex-card').forEach((card,i)=>{
+    const bd=card.querySelector('.ex-bd');
+    if(bd&&bd.style.display!=='none') openCards.push(i);
+  });
+  const openDetails=[];
+  document.querySelectorAll('#sess-ex-list details').forEach((d,i)=>{
+    if(d.open) openDetails.push(i);
+  });
+  save(); openSession(currentSessionDay);
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('#sess-ex-list .ex-card').forEach((card,i)=>{
+      const bd=card.querySelector('.ex-bd');
+      const cv=card.querySelector('.chevron');
+      if(openCards.includes(i)){
+        if(bd) bd.style.display='block';
+        if(cv) cv.classList.add('open');
+      } else {
+        if(bd) bd.style.display='none';
+        if(cv) cv.classList.remove('open');
+      }
+    });
+    document.querySelectorAll('#sess-ex-list details').forEach((d,i)=>{
+      if(openDetails.includes(i)) d.open=true;
+    });
+  });
+}
+
+// ══ PROGRESSION ENGINE ══
+function analyzeEx(ex) {
+  const days=parseInt(A.days)||4, split=SPLITS[days]||SPLITS[4], week=S.currentWeek;
+  const cfg=GOAL_CONFIG[A.goal||'both'];
+  const allReps=[], allRIR=[];
+  split.forEach((d,di)=>{
+    if(!S.completedDays[week+'_'+di]) return;
+    const {exercises}=pickExercises(d.type,week);
+    if(!exercises.find(e=>e.id===ex.id)) return;
+    const matchEx=exercises.find(e=>e.id===ex.id);
+    const exSetsCount=matchEx?.effectiveSets||3;
+    const adjKey=week+'_'+di;
+    for(let s=1;s<=exSetsCount;s++){
+      const lg=S.logs[adjKey+'_'+ex.id+'_'+s];
+      if(lg&&lg.reps){ allReps.push(parseFloat(lg.reps)); if(lg.rir!==''&&lg.rir!==undefined) allRIR.push(parseFloat(lg.rir)); }
+    }
+  });
+  if(!allReps.length) return null;
+  const range=cfg.range;
+  const avgReps=allReps.reduce((a,b)=>a+b,0)/allReps.length;
+  const avgRIR=allRIR.length?allRIR.reduce((a,b)=>a+b,0)/allRIR.length:2;
+  const [rMin,rMax]=range;
+  const allTop=allReps.every(r=>r>=rMax);
+  const mostMin=allReps.filter(r=>r>=rMin).length>=Math.ceil(allReps.length*.75);
+  const avgBelowMin=avgReps<rMin-.5, lowRIR=avgRIR<=1, highRIR=avgRIR>=3;
+  const lastW=A.weights[ex.wk]||(ex.step>0?ex.step*5:null);
+  let decision,reason,nextW;
+  if(!lastW){decision='hold';reason='尚無參考重量資料，維持現狀';nextW=null}
+  else if(avgBelowMin&&lowRIR){decision='down';nextW=Math.round((lastW-ex.step)/ex.step)*ex.step;reason=`平均次數 ${avgReps.toFixed(1)} 下低於下限（${rMin}），且 RIR 偏低（${avgRIR.toFixed(1)}），建議降重 ${ex.step}${ex.unit}`}
+  else if(allTop&&highRIR){decision='big_up';nextW=Math.round((lastW+ex.step*2)/ex.step)*ex.step;reason=`所有組達到上限（${rMax}下），RIR ${avgRIR.toFixed(1)} 儲備充足，建議大幅加重 ${ex.step*2}${ex.unit}`}
+  else if(allTop){decision='up';nextW=Math.round((lastW+ex.step)/ex.step)*ex.step;reason=`所有組達到上限（${rMax}下），雙漸進觸發，加重 ${ex.step}${ex.unit}`}
+  else if(mostMin){decision='hold';nextW=lastW;reason=`大部分組達到下限，維持重量繼續累積至 ${rMax} 下`}
+  else{decision='hold';nextW=lastW;reason=`次數不穩定（${allReps.map(r=>Math.round(r*10)/10).join('、')} 下），維持重量`}
+  return {decision,reason,nextW,avgReps,avgRIR,range,lastW,ex};
+}
+
+function renderProgress() {
+  const days=parseInt(A.days)||4, split=SPLITS[days]||SPLITS[4], week=S.currentWeek;
+  const seen=new Set(), results=[];
+  split.forEach(d=>{
+    pickExercises(d.type,week).exercises.forEach(ex=>{
+      if(!seen.has(ex.id)&&ex.wk){seen.add(ex.id);const r=analyzeEx(ex);if(r)results.push(r);}
+    });
+  });
+  const up=results.filter(r=>r.decision==='up'||r.decision==='big_up').length;
+  const dn=results.filter(r=>r.decision==='down').length;
+  const hold=results.filter(r=>r.decision==='hold').length;
+  const nextWeekSets=getWeekSets(week+1, 2);  // 下週每動作組數估計（2個複合為基準）
+  document.getElementById('prog-sub').textContent='Mesocycle '+S.mesocycle+'　第 '+week+' 週訓練後';
+  const progExList = document.getElementById('prog-ex-list');
+  const existingGuide = document.getElementById('prog-guide');
+  if (existingGuide) existingGuide.remove();
+  const guide = document.createElement('div');
+  guide.id = 'prog-guide';
+  guide.className = 'notice';
+  guide.style.marginBottom = '1rem';
+  guide.innerHTML = '<strong>這份報告說明什麼</strong><br>' +
+    '系統根據本週每個動作的完成次數和 RIR，判斷下週應該加重、維持還是降重。<br>' +
+    '• <span style="color:var(--success)">加重</span>：所有組都達到次數上限，代表重量對你已經太輕<br>' +
+    '• <span style="color:var(--blue-text,#1a4a7a)">維持</span>：大部分組達到下限但還沒全到上限，繼續這個重量累積次數<br>' +
+    '• <span style="color:var(--danger)">建議降重</span>：次數明顯低於下限且 RIR 偏低，重量過重影響訓練品質<br>' +
+    '確認後系統會更新下週的建議重量。';
+  progExList.parentNode.insertBefore(guide, progExList);
+  document.getElementById('prog-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-lbl">進步動作</div><div class="stat-val" style="color:var(--success)">${up} 個</div></div>
+    <div class="stat-card"><div class="stat-lbl">維持</div><div class="stat-val">${hold} 個</div></div>
+    <div class="stat-card"><div class="stat-lbl">建議降重</div><div class="stat-val" style="color:var(--danger)">${dn} 個</div></div>
+    <div class="stat-card"><div class="stat-lbl">下週每動作</div><div class="stat-val">${nextWeekSets} 組</div></div>`;
+  if(!results.length){document.getElementById('prog-ex-list').innerHTML='<div class="notice">完成本週所有訓練日後自動生成分析報告</div>';return;}
+  const list=document.getElementById('prog-ex-list'); list.innerHTML='';
+  results.forEach((r,i)=>{
+    const ov=S.progOverrides[r.ex.id];
+    const fw=ov!==undefined?ov:r.nextW;
+    const diff=fw!=null&&r.lastW!=null?fw-r.lastW:0;
+    const diffStr=diff>0?'+'+diff:diff<0?String(diff):'±0';
+    const pillCls=r.decision==='up'||r.decision==='big_up'?'pill-up':r.decision==='down'?'pill-dn':'pill-hold';
+    const pillLbl=r.decision==='big_up'?'大幅加重':r.decision==='up'?'加重':r.decision==='down'?'建議降重':'維持';
+    const rirCls=r.avgRIR>=3?'g':r.avgRIR>=1.5?'':'d';
+    const repCls=r.avgReps>=r.range[0]?'g':r.avgReps>=r.range[0]-1?'w':'d';
+    const card=document.createElement('div'); card.className='prog-item';
+    card.innerHTML=`
+      <div class="prog-hd" onclick="toggleCard(this)">
+        <div>
+          <div class="prog-nm">${r.ex.name}</div>
+          <div class="prog-sub">${r.lastW!=null?r.lastW+r.ex.unit:'—'} → ${fw!=null?fw+r.ex.unit:'—'}（${diffStr}）</div>
+        </div>
+        <span class="prog-pill ${pillCls}">${pillLbl}</span>
+        <span class="chevron ${i===0?'open':''}">▾</span>
+      </div>
+      <div class="prog-bd" style="${i===0?'':'display:none'}">
+        <div class="data-g">
+          <div class="dc"><div class="dl">平均次數</div><div class="dv ${repCls}">${r.avgReps.toFixed(1)} 下</div></div>
+          <div class="dc"><div class="dl">目標範圍</div><div class="dv">${r.range[0]}–${r.range[1]}</div></div>
+          <div class="dc"><div class="dl">平均 RIR</div><div class="dv ${rirCls}">${r.avgRIR.toFixed(1)}</div></div>
+        </div>
+        <div class="reason">${r.reason}</div>
+        <div class="next-g">
+          <div class="nc${diff!==0?' hi':''}">
+            <div class="nc-l">下週建議重量</div>
+            <div class="nc-v">${fw!=null?fw+' '+r.ex.unit:'—'}</div>
+            <div class="nc-s">${diffStr}${ov!==undefined?' · 已手動覆蓋':''}</div>
+          </div>
+          <div class="nc">
+            <div class="nc-l">次數目標</div>
+            <div class="nc-v">${r.range[0]}–${r.range[1]} 下</div>
+          </div>
+        </div>
+        <div class="ov-row">
+          <span class="ov-lbl">手動調整重量</span>
+          <input class="oi" type="number" step="${r.ex.step}" placeholder="${fw||'—'}" id="ov_${r.ex.id}" value="${ov!==undefined?ov:''}">
+          <span style="font-size:12px;color:var(--text3)">${r.ex.unit}</span>
+          <button class="btn-ap" onclick="applyOv('${r.ex.id}',${r.ex.step})">套用</button>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+  document.getElementById('prog-confirmed').style.display='none';
+  document.getElementById('prog-confirm-btn').disabled=false;
+  document.getElementById('prog-confirm-btn').style.opacity='1';
+}
+
+function applyOv(id,step) {
+  const v=parseFloat(document.getElementById('ov_'+id).value);
+  if(isNaN(v)) delete S.progOverrides[id]; else S.progOverrides[id]=Math.round(v/step)*step;
+  save(); renderProgress();
+}
+function triggerDeload() {
+  S.currentWeek=getMesoWeeks()+1; save(); goScreen('screen-home'); renderHome();
+}
+function confirmProg() {
+  const days=parseInt(A.days)||4, split=SPLITS[days]||SPLITS[4], week=S.currentWeek;
+  const seen=new Set();
+  split.forEach(d=>{
+    pickExercises(d.type,week).exercises.forEach(ex=>{
+      if(!seen.has(ex.id)&&ex.wk){
+        seen.add(ex.id);
+        const r=analyzeEx(ex);
+        if(r&&r.nextW!=null){
+          const fw=S.progOverrides[ex.id]!==undefined?S.progOverrides[ex.id]:r.nextW;
+          if(fw!=null) A.weights[ex.wk]=parseFloat((fw/1.33).toFixed(1));
+        }
+      }
+    });
+  });
+  S.currentWeek=Math.min(week+1,getMesoWeeks()+1);
+  S.progOverrides={}; save();
+  document.getElementById('prog-confirmed').style.display='block';
+  document.getElementById('prog-confirm-btn').disabled=true;
+  document.getElementById('prog-confirm-btn').style.opacity='.35';
+}
+
+function showMesoReview() {
+  const days=parseInt(A.days)||4, split=SPLITS[days]||SPLITS[4];
+  const week=getMesoWeeks();
+  const seen=new Set(), allResults=[];
+  split.forEach(d=>{
+    pickExercises(d.type,week).exercises.forEach(ex=>{
+      if(!seen.has(ex.id)&&ex.wk){
+        seen.add(ex.id);
+        const r=analyzeEx(ex);
+        allResults.push({ex, decision:r?r.decision:'hold'});
+      }
+    });
+  });
+  const muscleWeekVols={};
+  for(let w=1;w<=getMesoWeeks();w++){
+    split.forEach(d=>{
+      const {exercises}=pickExercises(d.type,w);
+      exercises.forEach(ex=>{
+        (ex.primary||[]).forEach(m=>{muscleWeekVols[m]=(muscleWeekVols[m]||0)+ex.effectiveSets;});
+        Object.entries(ex.indirect||{}).forEach(([m,c])=>{muscleWeekVols[m]=(muscleWeekVols[m]||0)+ex.effectiveSets*c;});
+      });
+    });
+  }
+  const avgMuscleVol={};
+  Object.entries(muscleWeekVols).forEach(([m,v])=>{avgMuscleVol[m]=v/getMesoWeeks();});
+  const keep=allResults.filter(r=>r.decision==='up'||r.decision==='big_up');
+  const stalled=allResults.filter(r=>r.decision==='hold'||r.decision==='down');
+  const weakMuscles=Object.entries(avgMuscleVol)
+    .filter(([m,v])=>m!=='delt_a'&&v<(MUSCLE_MEV[m]||10)*0.8).map(([m])=>m);
+  let keepHtml=keep.map(r=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span>${r.ex.name}</span><span class="badge badge-done">持續進步</span>
+    </div>`).join('')||'<div style="font-size:13px;color:var(--text3);padding:6px 0">無資料</div>';
+  let stallHtml=stalled.map(r=>{
+    const alts=Object.values(EX_DB).filter(e=>e.id!==r.ex.id&&(e.primary||[]).some(m=>(r.ex.primary||[]).includes(m))&&e.wk).slice(0,2);
+    return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span>${r.ex.name}</span>
+        <span style="font-size:11px;color:var(--warning)">${r.decision==='down'?'建議降重':'連續停滯'}</span>
+      </div>
+      ${alts.length?`<div style="font-size:12px;color:var(--text3);margin-top:3px">備選：${alts.map(a=>a.name).join('、')}</div>`:''}
+    </div>`;
+  }).join('')||'<div style="font-size:13px;color:var(--text3);padding:6px 0">無停滯動作</div>';
+  let weakHtml=weakMuscles.map(m=>{
+    const suggestions=Object.values(EX_DB).filter(e=>(e.primary||[]).includes(m)).slice(0,2);
+    return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:13px">${MUSCLE_NAME[m]}　<span style="font-size:11px;color:var(--warning)">平均 ${Math.round(avgMuscleVol[m]*10)/10} 組/週（低於 MEV）</span></div>
+      ${suggestions.length?`<div style="font-size:12px;color:var(--text3);margin-top:3px">加強：${suggestions.map(a=>a.name).join('、')}</div>`:''}
+    </div>`;
+  }).join('')||'<div style="font-size:13px;color:var(--text3);padding:6px 0">所有肌群組數達標</div>';
+  document.getElementById('meso-review-content').innerHTML=`
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;margin-bottom:.5rem">持續進步的動作</div>${keepHtml}
+    </div>
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;margin-bottom:.5rem">↻ 建議替換或調整</div>${stallHtml}
+    </div>
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;margin-bottom:.5rem">＋ 弱項肌群建議加強</div>${weakHtml}
+    </div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.7;padding:.75rem;background:var(--surface2);border-radius:var(--r-sm)">
+      <strong style="color:var(--text);display:block;margin-bottom:.3rem">下一個 Mesocycle 會怎麼進行</strong>
+      • 建議重量會從這個週期的最終重量繼續往上推進<br>
+      • 訓練量從 MEV 重新出發（稍低於本週期末），讓身體在新的重量基礎上重建<br>
+      • 針對停滯的動作，換一個同肌群的變體動作，讓身體面對新的刺激角度<br>
+      • 如果體重、生活作息或訓練目標有明顯變化，建議按「重新設定課表」重新填寫問卷
+    </div>`;
+  goScreen('screen-meso-review');
+}
+
+function advanceMesocycle() {
+  S.mesocycle++; S.currentWeek=1;
+  S.completedDays={}; S.logs={}; S.adj={}; S.progOverrides={};
+  if(!S.exOverrides) S.exOverrides={};
+  save(); goScreen('screen-home'); renderHome();
+}
+function exportExcel() {
+  const days   = parseInt(A.days)||4;
+  const split  = SPLITS[days]||SPLITS[4];
+  const mw     = getMesoWeeks();
+  const cfg    = GOAL_CONFIG[A.goal||'both'];
+  const wb     = XLSX.utils.book_new();
+
+  // ── 工作表1：課表總覽 ──
+  const overviewData = [
+    ['永衡運動 — 訓練課表總覽'],
+    ['目標', GOAL_LBL[A.goal||'both'], '年資', LEVEL_LBL[A.level||'beginner'],
+     '每週天數', days+'天', '分割', SPLIT_LBL[days]||'—'],
+    ['Mesocycle長度', mw+'週', '目前Mesocycle', S.mesocycle, '目前週次', '第'+S.currentWeek+'週'],
+    [],
+  ];
+  for (let w=1; w<=mw; w++) {
+    const rir = getWeekRIR(w);
+    overviewData.push(['第'+w+'週（目標RIR '+rir+'）']);
+    split.forEach(d => {
+      const {exercises, compSets} = pickExercises(d.type, w);
+      overviewData.push([
+        '', d.name, d.type, cfg.desc,
+        exercises.length+'個動作',
+        exercises.map(e => {
+          const exSets = e.effectiveSets;
+          const sw = getSW(e, cfg.pct);
+          return e.name + '（'+exSets+'組×'+cfg.range[0]+'–'+cfg.range[1]+'下' + (sw?' @ '+sw+e.unit:'')+'）';
+        }).join('　')
+      ]);
+    });
+    overviewData.push([]);
+  }
+  const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
+  wsOverview['!cols'] = [{wch:6},{wch:6},{wch:8},{wch:14},{wch:10},{wch:80}];
+  XLSX.utils.book_append_sheet(wb, wsOverview, '課表總覽');
+
+  // ── 工作表2：訓練紀錄 ──
+  const logData = [
+    ['永衡運動 — 訓練紀錄'],
+    [],
+    ['週次','日期標記','訓練日','動作','組別','實際重量','完成次數','RIR','建議重量','備註'],
+  ];
+  for (let w=1; w<=mw; w++) {
+    split.forEach((d, di) => {
+      const {exercises} = pickExercises(d.type, w);
+      const adjKey = w+'_'+di;
+      const done = !!S.completedDays[adjKey];
+      exercises.forEach(ex => {
+        const exSets = ex.effectiveSets;
+        const sw = getSW(ex, cfg.pct);
+        for (let s=1; s<=exSets; s++) {
+          const lk = adjKey+'_'+ex.id+'_'+s;
+          const lg = S.logs[lk] || {};
+          logData.push([
+            '第'+w+'週',
+            d.name,
+            d.type+'（'+cfg.desc+'）',
+            ex.name,
+            s+'組',
+            lg.weight || '',
+            lg.reps   || '',
+            lg.rir    || '',
+            sw ? sw+' '+ex.unit : '—',
+            done ? '已完成' : ''
+          ]);
+        }
+      });
+    });
+  }
+  const wsLog = XLSX.utils.aoa_to_sheet(logData);
+  wsLog['!cols'] = [
+    {wch:8},{wch:6},{wch:16},{wch:16},{wch:5},
+    {wch:8},{wch:8},{wch:5},{wch:10},{wch:8}
+  ];
+  XLSX.utils.book_append_sheet(wb, wsLog, '訓練紀錄');
+
+  // ── 工作表3：動作進步追蹤 ──
+  const trackData = [
+    ['永衡運動 — 動作進步追蹤'],
+    [],
+    ['動作','器材','主要肌群','參考重量（10RM）'],
+  ];
+  const seen = new Set();
+  split.forEach(d => {
+    pickExercises(d.type, 1).exercises.forEach(ex => {
+      if (!seen.has(ex.id)) {
+        seen.add(ex.id);
+        const refW = ex.wk ? (A.weights[ex.wk]||'') : '';
+        const primaryStr = (ex.primary||[]).map(m=>MUSCLE_NAME[m]).join('、');
+        trackData.push([ex.name, ex.equip, primaryStr, refW ? refW+' '+ex.unit : '待填入']);
+      }
+    });
+  });
+  trackData.push([]);
+  trackData.push(['週次進步記錄表']);
+  const seen2 = new Set();
+  const exList = [];
+  split.forEach(d => {
+    pickExercises(d.type, 1).exercises.forEach(ex => {
+      if (!seen2.has(ex.id) && ex.wk) { seen2.add(ex.id); exList.push(ex); }
+    });
+  });
+  const headerRow = [''].concat(exList.map(e=>e.name));
+  trackData.push(headerRow);
+  for (let w=1; w<=mw+1; w++) {
+    const weekLabel = w===mw+1 ? '減量週' : '第'+w+'週';
+    const row = [weekLabel];
+    exList.forEach(ex => {
+      let bestWeight = '';
+      split.forEach((d,di) => {
+        const {exercises} = pickExercises(d.type, w);
+        if (!exercises.find(e=>e.id===ex.id)) return;
+        const adjKey = w+'_'+di;
+        const exSets = exercises.find(e=>e.id===ex.id)?.effectiveSets || 3;
+        for (let s=1; s<=exSets; s++) {
+          const lg = S.logs[adjKey+'_'+ex.id+'_'+s];
+          if (lg?.weight) bestWeight = lg.weight+' '+ex.unit;
+        }
+      });
+      row.push(bestWeight || '—');
+    });
+    trackData.push(row);
+  }
+  const wsTrack = XLSX.utils.aoa_to_sheet(trackData);
+  wsTrack['!cols'] = [{wch:10}].concat(exList.map(()=>({wch:14})));
+  XLSX.utils.book_append_sheet(wb, wsTrack, '進步追蹤');
+
+  // 下載
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, '永衡運動_訓練課表_'+date+'.xlsx');
+}
+
+function confirmReset() {
+  if(confirm('確定要重新設定課表嗎？所有訓練紀錄將會清除。')) {
+    // 清除所有版本的 key
+    for (let v=1; v<=30; v++) localStorage.removeItem('yh_training_v'+v);
+    localStorage.removeItem(STORAGE_KEY);
+    // 重置記憶體中的狀態
+    A = {goal:null,level:null,gender:null,age:null,days:null,bodyWeight:null,
+         meso:'auto',deload:'volume',frontSquat:false,
+         weights:{squat:null,legpress:null,legext:null,legcurl:null,deadlift:null,
+                  bench:null,chestpress:null,ohp:null,pulldown:null,seatedrow:null,pullup:null}};
+    S = {currentWeek:1,completedDays:{},logs:{},adj:{},progOverrides:{},mesocycle:1,exOverrides:{}};
+    // 重置問卷 UI
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+    document.querySelectorAll('input[type=number]').forEach(i=>i.value='');
+    document.querySelectorAll('select').forEach(s=>s.value='');
+    document.getElementById('ob-n1').disabled=true;
+    document.getElementById('ob-n2').disabled=true;
+    document.getElementById('ob-n3').disabled=true;
+    // 重置預設選項
+    document.querySelector('[data-f="meso"][data-v="auto"]')?.classList.add('sel');
+    document.querySelector('[data-f="deload"][data-v="volume"]')?.classList.add('sel');
+    obStep(1);
+    goScreen('screen-onboard');
+  }
+}
+
+// ══ SUPABASE ══
+const SUPABASE_URL = 'https://gciugrctjifyjtaeqnns.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjaXVncmN0amlmeWp0YWVxbm5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MzI2NDEsImV4cCI6MjA5NzUwODY0MX0.P_g26217XSio0ApfQlalTr8kRDOoQniQQ7KEUmIaayk';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let syncTimer = null;
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot || !lbl) return;
+  if (state === 'ok')   { dot.className='sync-dot ok'; lbl.textContent='已同步'; }
+  if (state === 'err')  { dot.className='sync-dot err'; lbl.textContent='同步失敗'; }
+  if (state === 'sync') { dot.className='sync-dot'; lbl.textContent='同步中…'; }
+}
+
+async function syncToSupabase() {
+  if (!currentUser) return;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    setSyncStatus('sync');
+    try {
+      const uid = currentUser.id;
+      // upsert settings
+      await sb.from('member_settings').upsert({
+        user_id: uid,
+        goal: A.goal, level: A.level, gender: A.gender,
+        age: A.age, days: A.days, body_weight: A.bodyWeight,
+        meso: A.meso, deload: A.deload, front_squat: A.frontSquat,
+        weights: A.weights, updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      // upsert state
+      await sb.from('training_state').upsert({
+        user_id: uid,
+        current_week: S.currentWeek, mesocycle: S.mesocycle,
+        completed_days: S.completedDays, adj: S.adj,
+        prog_overrides: S.progOverrides, ex_overrides: S.exOverrides,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      // upsert individual log entries
+      const logEntries = Object.entries(S.logs).map(([key, val]) => {
+        const parts = key.split('_');
+        return {
+          user_id: uid, log_key: key,
+          week: parseInt(parts[0]) || null,
+          day_index: parseInt(parts[1]) || null,
+          exercise_id: parts[2] || null,
+          set_number: parseInt(parts[3]) || null,
+          reps: val.reps ? parseFloat(val.reps) : null,
+          weight: val.weight ? parseFloat(val.weight) : null,
+          rir: val.rir !== undefined && val.rir !== '' ? parseFloat(val.rir) : null,
+        };
+      });
+      if (logEntries.length > 0) {
+        await sb.from('training_logs').upsert(logEntries, { onConflict: 'user_id,log_key' });
+      }
+      setSyncStatus('ok');
+    } catch(e) { setSyncStatus('err'); }
+  }, 1200);
+}
+
+async function loadFromSupabase(uid) {
+  const [settRes, stateRes, logsRes] = await Promise.all([
+    sb.from('member_settings').select('*').eq('user_id', uid).single(),
+    sb.from('training_state').select('*').eq('user_id', uid).single(),
+    sb.from('training_logs').select('*').eq('user_id', uid)
+  ]);
+  if (settRes.data) {
+    const d = settRes.data;
+    A = { ...A,
+      goal: d.goal, level: d.level, gender: d.gender,
+      age: d.age, days: d.days, bodyWeight: d.body_weight,
+      meso: d.meso || 'auto', deload: d.deload || 'volume',
+      frontSquat: d.front_squat || false,
+      weights: d.weights || {}
+    };
+  }
+  if (stateRes.data) {
+    const d = stateRes.data;
+    S = { ...S,
+      currentWeek: d.current_week || 1, mesocycle: d.mesocycle || 1,
+      completedDays: d.completed_days || {},
+      adj: d.adj || {}, progOverrides: d.prog_overrides || {},
+      exOverrides: d.ex_overrides || {}
+    };
+  }
+  if (logsRes.data && logsRes.data.length > 0) {
+    S.logs = {};
+    logsRes.data.forEach(row => {
+      S.logs[row.log_key] = {
+        reps: row.reps, weight: row.weight, rir: row.rir
+      };
+    });
+  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({A,S})); } catch(e){}
+  // 只要有雲端設定資料且有 days（代表完成過問卷），就算有效
+  return !!settRes.data && !!(A.goal || A.days);
+}
+
+// ── AUTH UI ──
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('auth-login-form').style.display = tab==='login' ? '' : 'none';
+  document.getElementById('auth-register-form').style.display = tab==='register' ? '' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const btn = document.getElementById('btn-login');
+  const errEl = document.getElementById('login-err');
+  if (!email || !pw) { errEl.textContent='請填寫電子郵件和密碼'; return; }
+  btn.disabled = true; btn.textContent = '登入中…';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    errEl.textContent = error.message.includes('Invalid') ? '電子郵件或密碼錯誤' : error.message;
+    btn.disabled = false; btn.textContent = '登入';
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+  const btn = document.getElementById('btn-register');
+  const errEl = document.getElementById('register-err');
+  const msgEl = document.getElementById('register-msg');
+  if (!name || !email || !pw) { errEl.textContent='請填寫所有欄位'; return; }
+  if (pw.length < 6) { errEl.textContent='密碼至少 6 個字元'; return; }
+  btn.disabled = true; btn.textContent = '建立中…';
+  const { error } = await sb.auth.signUp({
+    email, password: pw,
+    options: { data: { name } }
+  });
+  if (error) {
+    errEl.textContent = error.message;
+    btn.disabled = false; btn.textContent = '建立帳號';
+  } else {
+    errEl.textContent = '';
+    msgEl.textContent = '✓ 帳號建立成功！請確認信箱驗證郵件後登入。';
+    btn.disabled = false; btn.textContent = '建立帳號';
+  }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  A = {goal:null,level:null,gender:null,age:null,days:null,bodyWeight:null,
+       meso:'auto',deload:'volume',frontSquat:false,
+       weights:{squat:null,legpress:null,legext:null,legcurl:null,deadlift:null,
+                bench:null,chestpress:null,ohp:null,pulldown:null,seatedrow:null,pullup:null}};
+  S = {currentWeek:1,completedDays:{},logs:{},adj:{},progOverrides:{},mesocycle:1,exOverrides:{}};
+  goScreen('screen-auth');
+}
+
+// ── INIT ──
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    setSyncStatus('sync');
+    let hasCloud = false;
+    try {
+      hasCloud = await loadFromSupabase(currentUser.id);
+    } catch(e) {
+      // 網路失敗時 fallback 到 localStorage
+    }
+    setSyncStatus(hasCloud ? 'ok' : 'err');
+    if (hasCloud) {
+      goScreen('screen-home'); renderHome();
+    } else {
+      // 雲端失敗或無資料，嘗試 localStorage
+      const hasLocal = load();
+      if (hasLocal) {
+        goScreen('screen-home'); renderHome();
+        syncToSupabase(); // push local data to cloud
+      } else {
+        goScreen('screen-onboard');
+      }
+    }
+  } else {
+    goScreen('screen-auth');
+  }
+});
+</script>
+</body>
