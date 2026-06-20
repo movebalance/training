@@ -540,11 +540,10 @@ svg.icon { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fil
     <div class="step-title">訓練分割預覽</div>
     <div class="step-sub">系統依天數自動選擇最適合的分割方式</div>
     <div class="notice" style="margin-bottom:1rem">
-      課表採用<strong>波動週期（DUP）</strong>設計：每次訓練的強度和次數不同，讓身體持續面對新的刺激。<br>
-      <strong>Day A</strong>（大重量低次數）→ 訓練神經系統徵召能力<br>
-      <strong>Day B</strong>（中等重量中次數）→ 最大化肌肉生長刺激<br>
-      <strong>Day C</strong>（輕重量高次數）→ 代謝壓力與肌肉泵感<br>
-      三種模式輪替比單一強度訓練有更好的長期適應效果。
+      課表採用 <strong>Muscle & Strength Pyramid（Eric Helms）</strong> 方法：每週組數線性遞增，讓身體在 Mesocycle 內逐步累積訓練量。<br>
+      <strong>組數遞增</strong>：第 1 週從 MEV（最低有效組數）出發，每週 +2 組，最後一週達到高訓練量<br>
+      <strong>RIR 目標下降</strong>：第 1 週輕鬆（RIR 3–4），每週強度遞增，最後一週接近力竭（RIR 0–1）<br>
+      <strong>減量週</strong>：最後一週組數減半、重量不變，讓身體超補償後進入下一個週期
     </div>
     <div id="ob-split-prev"></div>
     <div class="btn-row">
@@ -641,8 +640,9 @@ svg.icon { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fil
     <div class="step-sub">確認後生成第一個 Mesocycle 課表</div>
     <div class="notice" style="margin-bottom:1rem">
       <strong>開始訓練前請注意</strong><br>
-      • 第一週建議用<strong>稍輕的重量</strong>熟悉動作，確認 RIR 是否與感受吻合<br>
+      • 第一週組數最少、強度最輕（RIR 3–4），讓身體適應動作模式<br>
       • <strong>RIR（還能再做幾下）</strong>：完成每組後評估還能多做幾下。RIR 2 = 還能再做 2 下才力竭<br>
+      • 每週組數會自動遞增，RIR 目標也會逐週下降，最後一週接近力竭<br>
       • 每完成一天按「完成本日訓練」，所有訓練日完成後系統自動生成下週建議<br>
       • 如果某天狀態不好，可用訓練日的「調降」按鈕臨時降低 5% 重量
     </div>
@@ -973,21 +973,21 @@ const DELOAD_LBL = {volume:'降量型', intensity:'降強度型', active:'主動
 const SPLIT_LBL  = {3:'全身訓練 × 3', 4:'上下肢分割 × 2', 5:'上肢 × 3 + 下肢 × 2', 6:'推拉腿 PPL × 2'};
 
 // 計算本週每個複合動作應該做幾組（Helms 線性波動）
-// 週總組數 = start + (week-1) * weekInc，上限 maxSets
-// 每動作組數 = 週總組數 / 複合動作數（四捨五入，最少 2 組）
-// 減量週：取最後訓練週組數 × 50%
+// 每個動作固定從起始組數開始，每週 +1 組
+// 初階：3→4→5→6→7（5週），中階：3→5→7→9（4週），進階：3→6→9（3週）
+// 減量週：最後訓練週組數 × 50%
 function getWeekSets(week, numCompounds) {
   const cfg = HELMS_VOL[A.level||'beginner'];
   const mw  = getMesoWeeks();
   const isDeload = week > mw;
+  // 每動作起始組數固定為 3，每週 +1
+  const startSets = 3;
+  const weekInc = 1;
   if (isDeload) {
-    // 減量週：最後訓練週的組數 × 50%
-    const lastWeekTotal = Math.min(cfg.start + (mw - 1) * cfg.weekInc, cfg.maxSets);
-    const lastPerEx = Math.max(2, Math.round(lastWeekTotal / Math.max(1, numCompounds)));
-    return Math.max(1, Math.round(lastPerEx * 0.5));
+    const lastWeekSets = startSets + (mw - 1) * weekInc;
+    return Math.max(1, Math.round(lastWeekSets * 0.5));
   }
-  const weekTotal = Math.min(cfg.start + (week - 1) * cfg.weekInc, cfg.maxSets);
-  return Math.max(2, Math.round(weekTotal / Math.max(1, numCompounds)));
+  return startSets + (week - 1) * weekInc;
 }
 
 // 本週建議 RIR 目標（Helms：第1週輕鬆 RIR 3–4，逐週下降到最後一週 RIR 0–1）
