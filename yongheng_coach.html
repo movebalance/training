@@ -159,6 +159,19 @@ const WEIGHT_KEYS = {
   legcurl:'Leg Curl', bench:'槓鈴胸推', ohp:'槓鈴肩推',
   pulldown:'下拉', seatedrow:'坐姿划船', pullup:'引體向上'
 };
+const EX_NAMES = {
+  squat:'背蹲舉', frontsq:'前蹲舉', goblet:'高腳杯深蹲', lunge:'弓步蹲',
+  bulgarian:'後腳抬高蹲', deadlift:'傳統硬舉', rdl:'羅馬尼亞硬舉',
+  slrdl:'單腳硬舉', legpress:'腿推機', legext:'腿伸展', legcurl:'腿彎舉',
+  hipabd:'髖外展', calfpress:'坐姿提踵', bench:'槓鈴臥推', dbpress:'啞鈴臥推',
+  incline:'上斜臥推', dips:'撐體', ohp:'槓鈴肩推', dbohp:'啞鈴肩推',
+  lateralraise:'側平舉', frontraise:'前平舉', rearfly:'後三角飛鳥',
+  pulldown:'下拉', pullup:'引體向上', asst_pu:'輔助引體向上',
+  seatedrow:'坐姿划船', bentrow:'俯身划船', facepull:'臉拉',
+  bicep_curl:'二頭彎舉', hammer:'錘式彎舉', tricep_push:'三頭下壓',
+  overhead_ext:'過頭三頭伸展', beltsquat:'腰帶深蹲', chestpress:'胸推機',
+  lateralsq:'側蹲', pistol:'單腳深蹲'
+};
 
 let allMembers = [];
 let currentCoach = null;
@@ -249,6 +262,7 @@ function filterMembers() {
   const q = document.getElementById('search-input').value.trim().toLowerCase();
   if (!q) { renderMembers(allMembers); return; }
   renderMembers(allMembers.filter(m =>
+    (m.name||'').toLowerCase().includes(q) ||
     (m.user_id||'').toLowerCase().includes(q)
   ));
 }
@@ -269,20 +283,96 @@ function renderMembers(members) {
     const level  = LEVEL_LBL[m.level] || '—';
     const days   = m.days ? m.days + ' 天/週' : '—';
     const weights = m.weights || {};
+    const completedDays = m.state?.completed_days || {};
+    const completedCount = Object.keys(completedDays).length;
+
+    // 參考重量
     const weightEntries = Object.entries(WEIGHT_KEYS)
       .filter(([k]) => weights[k])
       .map(([k, lbl]) => `<div class="wt-item"><div class="wt-name">${lbl}</div><div class="wt-val">${weights[k]}</div></div>`)
       .join('');
 
-    // 訓練紀錄統計
-    const totalSets = m.logs.length;
-    const completedDays = Object.keys(m.state?.completed_days || {}).length;
+    // 按週次整理訓練紀錄
+    const logsByKey = {};
+    (m.logs||[]).forEach(l => {
+      const key = l.log_key; // 格式：week_dayIndex_exerciseId_setNum
+      if (!key) return;
+      const parts = key.split('_');
+      if (parts.length < 4) return;
+      const [w, d, ...exParts] = parts;
+      const setNum = exParts.pop();
+      const exId = exParts.join('_');
+      const dayKey = w + '_' + d;
+      if (!logsByKey[dayKey]) logsByKey[dayKey] = {};
+      if (!logsByKey[dayKey][exId]) logsByKey[dayKey][exId] = [];
+      logsByKey[dayKey][exId].push({ set: parseInt(setNum), ...l });
+    });
+
+    // 已完成的訓練日（按週次排序）
+    const doneDayKeys = Object.keys(completedDays).sort((a,b) => {
+      const [wa,da] = a.split('_').map(Number);
+      const [wb,db] = b.split('_').map(Number);
+      return wa!==wb ? wa-wb : da-db;
+    });
+
+    // 按週次分組
+    const weekGroups = {};
+    doneDayKeys.forEach(key => {
+      const [w] = key.split('_');
+      if (!weekGroups[w]) weekGroups[w] = [];
+      weekGroups[w].push(key);
+    });
+
+    const DAY_NAMES = ['一','二','三','四','五','六','日'];
+    const SPLIT_DAYS = {
+      3: ['週一','週三','週五'],
+      4: ['週一','週二','週四','週五'],
+      5: ['週一','週二','週四','週五','週六'],
+      6: ['週一','週二','週三','週四','週五','週六']
+    };
+    const splitDays = SPLIT_DAYS[m.days] || [];
+
+    const weekHtml = Object.entries(weekGroups).map(([w, dayKeys]) => {
+      const daysHtml = dayKeys.map(dayKey => {
+        const [wk, di] = dayKey.split('_');
+        const dayName = splitDays[parseInt(di)] || ('第'+(parseInt(di)+1)+'天');
+        const exLogs = logsByKey[dayKey] || {};
+        const exHtml = Object.entries(exLogs).map(([exId, sets]) => {
+          const exName = EX_NAMES[exId] || exId;
+          const sortedSets = sets.sort((a,b)=>a.set-b.set);
+          const setsStr = sortedSets.map(s => {
+            const parts = [];
+            if (s.weight!=null) parts.push(s.weight+'kg');
+            if (s.reps!=null) parts.push(s.reps+'下');
+            if (s.rir!=null) parts.push('RIR'+s.rir);
+            return parts.join('/') || '—';
+          }).join('　');
+          return `<div style="padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">
+            <span style="color:var(--text2);min-width:90px;display:inline-block">${exName}</span>
+            <span style="font-family:'DM Mono',monospace;color:var(--text)">${setsStr}</span>
+          </div>`;
+        }).join('');
+
+        return `<div style="margin-bottom:.75rem">
+          <div style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--text2)">
+            ${dayName}
+            <span style="font-size:11px;background:var(--green-bg);color:var(--green-text);padding:1px 7px;border-radius:8px;margin-left:6px">已完成</span>
+          </div>
+          ${exHtml || '<div style="font-size:11px;color:var(--text3)">無詳細記錄</div>'}
+        </div>`;
+      }).join('');
+
+      return `<div style="margin-bottom:1rem">
+        <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:.5rem;padding-bottom:4px;border-bottom:1px solid var(--border)">第 ${w} 週</div>
+        ${daysHtml}
+      </div>`;
+    }).join('') || '<div style="font-size:12px;color:var(--text3)">尚無完成記錄</div>';
 
     card.innerHTML = `
       <div class="member-hd" onclick="toggleMember(this)">
         <div>
           <div class="member-name">${m.name || m.user_id.slice(0,8)+'…'}</div>
-          <div class="member-meta">${goal}　${level}　${days}　Meso ${meso} 第 ${week} 週</div>
+          <div class="member-meta">${goal}　${level}　${days}　Meso ${meso} 第 ${week} 週　已完成 ${completedCount} 天</div>
         </div>
         <span class="chevron">▾</span>
       </div>
@@ -292,8 +382,7 @@ function renderMembers(members) {
           <div class="detail-card"><div class="detail-lbl">程度</div><div class="detail-val">${level}</div></div>
           <div class="detail-card"><div class="detail-lbl">每週天數</div><div class="detail-val">${days}</div></div>
           <div class="detail-card"><div class="detail-lbl">目前週次</div><div class="detail-val">Meso ${meso}　第 ${week} 週</div></div>
-          <div class="detail-card"><div class="detail-lbl">完成訓練日</div><div class="detail-val">${completedDays} 天</div></div>
-          <div class="detail-card"><div class="detail-lbl">紀錄組數</div><div class="detail-val">${totalSets} 組</div></div>
+          <div class="detail-card"><div class="detail-lbl">完成訓練日</div><div class="detail-val">${completedCount} 天</div></div>
           <div class="detail-card"><div class="detail-lbl">性別 / 年齡</div><div class="detail-val">${m.gender==='male'?'男':'女'} / ${m.age||'—'} 歲</div></div>
           <div class="detail-card"><div class="detail-lbl">體重</div><div class="detail-val">${m.body_weight ? m.body_weight + ' kg' : '—'}</div></div>
           <div class="detail-card"><div class="detail-lbl">Deload 方式</div><div class="detail-val">${DELOAD_LBL[m.deload]||'—'}</div></div>
@@ -302,24 +391,8 @@ function renderMembers(members) {
           <div class="section-title">參考重量（10RM）</div>
           <div class="weight-grid">${weightEntries}</div>
         ` : ''}
-        ${m.logs.length ? `
-          <div class="section-title">近期訓練紀錄（最近 10 組）</div>
-          <table class="prog-table">
-            <thead><tr>
-              <th>週_天</th><th>動作</th><th>組</th><th>重量</th><th>次數</th><th>RIR</th>
-            </tr></thead>
-            <tbody>
-              ${m.logs.slice(-10).reverse().map(l => `<tr>
-                <td style="color:var(--text3);font-family:'DM Mono',monospace">${l.week||''}週_${(l.day_index||0)+1}天</td>
-                <td>${l.exercise_id||'—'}</td>
-                <td style="font-family:'DM Mono',monospace">${l.set_number||'—'}</td>
-                <td style="font-family:'DM Mono',monospace">${l.weight!=null?l.weight+' ':''}</td>
-                <td style="font-family:'DM Mono',monospace">${l.reps!=null?l.reps+'下':''}</td>
-                <td style="font-family:'DM Mono',monospace">${l.rir!=null?'RIR '+l.rir:''}</td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        ` : '<div style="font-size:12px;color:var(--text3);margin-top:.5rem">尚無訓練紀錄</div>'}
+        <div class="section-title">訓練完成紀錄</div>
+        <div style="margin-top:.5rem">${weekHtml}</div>
       </div>
     `;
     grid.appendChild(card);
