@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>永衡運動｜教練後台</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f3; --surface: #ffffff; --surface2: #f0ede8;
+  --border: rgba(0,0,0,0.10); --border-mid: rgba(0,0,0,0.18);
+  --text: #1a1a18; --text2: #6b6b67; --text3: #a8a8a3;
+  --accent: #1a1a18; --accent-fg: #f7f6f3;
+  --green-bg: #e8f5e4; --green-text: #2d6b22;
+  --blue-bg: #e4eef8; --blue-text: #1a4a7a;
+  --amber-bg: #fdf0d8; --amber-text: #7a4e10;
+  --red-bg: #fce8e8; --red-text: #7a1f1f;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── AUTH ── */
+.auth-wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+.auth-card { width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.75rem 1.5rem; box-shadow: var(--shadow); }
+.auth-logo { font-size: 20px; font-weight: 500; margin-bottom: .25rem; text-align: center; }
+.auth-sub { font-size: 12px; color: var(--text3); margin-bottom: 2rem; text-align: center; }
+.auth-field { margin-bottom: 1rem; }
+.auth-label { font-size: 11px; color: var(--text2); margin-bottom: .375rem; display: block; text-transform: uppercase; letter-spacing: .05em; font-family: 'DM Mono', monospace; }
+.auth-input { width: 100%; padding: 9px 12px; font-size: 14px; border: 1px solid var(--border-mid); border-radius: var(--r-sm); background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+.auth-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,26,24,.07); }
+.auth-err { font-size: 12px; color: #c0392b; margin-top: .5rem; min-height: 16px; }
+.btn-primary { width: 100%; padding: 10px; border: none; border-radius: var(--r-sm); background: var(--accent); color: var(--accent-fg); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; margin-top: .5rem; transition: opacity .12s; }
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ── HEADER ── */
+.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: .875rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.header-brand { font-size: 14px; font-weight: 500; }
+.header-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.btn-sm { padding: 5px 12px; border: 1px solid var(--border-mid); border-radius: var(--r-sm); font-size: 12px; cursor: pointer; background: var(--surface); color: var(--text2); font-family: inherit; transition: background .12s; }
+.btn-sm:hover { background: var(--surface2); }
+
+/* ── LAYOUT ── */
+.container { max-width: 900px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+.page-title { font-size: 22px; font-weight: 500; letter-spacing: -.02em; margin-bottom: .25rem; }
+.page-sub { font-size: 13px; color: var(--text3); margin-bottom: 1.5rem; }
+
+/* ── SEARCH ── */
+.search-row { display: flex; gap: 8px; margin-bottom: 1.25rem; }
+.search-input { flex: 1; padding: 8px 12px; font-size: 13px; border: 1px solid var(--border-mid); border-radius: var(--r-sm); background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+.search-input:focus { border-color: var(--accent); }
+
+/* ── MEMBER LIST ── */
+.member-grid { display: flex; flex-direction: column; gap: 8px; }
+.member-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow); }
+.member-hd { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: .875rem 1.125rem; cursor: pointer; transition: background .12s; gap: 12px; }
+.member-hd:hover { background: var(--surface2); }
+.member-name { font-size: 14px; font-weight: 500; }
+.member-meta { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.member-badge { font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 500; white-space: nowrap; font-family: 'DM Mono', monospace; }
+.chevron { font-size: 14px; color: var(--text3); transition: transform .18s; display: inline-block; }
+.chevron.open { transform: rotate(180deg); }
+
+/* ── MEMBER DETAIL ── */
+.member-bd { border-top: 1px solid var(--border); padding: 1rem 1.125rem; display: none; }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+.detail-card { background: var(--surface2); border-radius: var(--r-sm); padding: .625rem .875rem; }
+.detail-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; font-family: 'DM Mono', monospace; }
+.detail-val { font-size: 14px; font-weight: 500; }
+.section-title { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; font-family: 'DM Mono', monospace; margin: .875rem 0 .5rem; padding-top: .875rem; border-top: 1px solid var(--border); }
+.weight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; margin-bottom: .75rem; }
+.wt-item { background: var(--surface2); border-radius: var(--r-sm); padding: .5rem .75rem; }
+.wt-name { font-size: 11px; color: var(--text2); margin-bottom: 2px; }
+.wt-val { font-size: 13px; font-weight: 500; font-family: 'DM Mono', monospace; }
+
+/* ── PROGRESS TABLE ── */
+.prog-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.prog-table th { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; font-weight: 400; padding: 0 0 6px; text-align: left; font-family: 'DM Mono', monospace; border-bottom: 1px solid var(--border); }
+.prog-table td { padding: 6px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.prog-table tr:last-child td { border-bottom: none; }
+.pill { font-size: 10px; padding: 2px 7px; border-radius: 8px; font-family: 'DM Mono', monospace; }
+.pill-up { background: var(--green-bg); color: var(--green-text); }
+.pill-hold { background: var(--blue-bg); color: var(--blue-text); }
+.pill-dn { background: var(--red-bg); color: var(--red-text); }
+
+/* ── EMPTY / LOADING ── */
+.empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+.loading { text-align: center; padding: 2rem; color: var(--text3); font-size: 13px; }
+
+/* ── STAT CARDS ── */
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: .875rem 1rem; box-shadow: var(--shadow); }
+.stat-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+.stat-val { font-size: 22px; font-weight: 500; letter-spacing: -.01em; }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH SCREEN ── -->
+<div id="screen-auth">
+  <div class="auth-wrap">
+    <div class="auth-logo">永衡運動</div>
+    <div class="auth-sub">教練後台</div>
+    <div class="auth-card">
+      <div class="auth-field">
+        <label class="auth-label">電子郵件</label>
+        <input class="auth-input" type="email" id="coach-email" placeholder="coach@example.com">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">密碼</label>
+        <input class="auth-input" type="password" id="coach-pw" placeholder="••••••">
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+      <button class="btn-primary" id="btn-login" onclick="doLogin()">登入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="screen-dash" style="display:none">
+  <div class="header">
+    <div>
+      <div class="header-brand">永衡運動　教練後台</div>
+      <div class="header-sub" id="coach-info"></div>
+    </div>
+    <button class="btn-sm" onclick="doLogout()">登出</button>
+  </div>
+  <div class="container">
+    <div class="page-title">會員管理</div>
+    <div class="page-sub" id="dash-sub">載入中…</div>
+
+    <div class="stat-row" id="stat-row"></div>
+
+    <div class="search-row">
+      <input class="search-input" type="text" id="search-input" placeholder="搜尋會員姓名或電子郵件…" oninput="filterMembers()">
+    </div>
+
+    <div class="member-grid" id="member-grid">
+      <div class="loading">載入會員資料中…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://gciugrctjifyjtaeqnns.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjaXVncmN0amlmeWp0YWVxbm5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MzI2NDEsImV4cCI6MjA5NzUwODY0MX0.P_g26217XSio0ApfQlalTr8kRDOoQniQQ7KEUmIaayk';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const GOAL_LBL  = {strength:'肌力提升', hypertrophy:'肌肥大', both:'兩者兼顧'};
+const LEVEL_LBL = {beginner:'初階', intermediate:'中階', advanced:'進階'};
+const DELOAD_LBL = {volume:'降量型', intensity:'降強度型', active:'主動恢復型'};
+const WEIGHT_KEYS = {
+  squat:'背蹲舉', deadlift:'傳統硬舉', legpress:'腿推機', legext:'Leg Ext',
+  legcurl:'Leg Curl', bench:'槓鈴胸推', ohp:'槓鈴肩推',
+  pulldown:'下拉', seatedrow:'坐姿划船', pullup:'引體向上'
+};
+
+let allMembers = [];
+let currentCoach = null;
+
+// ── AUTH ──
+async function doLogin() {
+  const email = document.getElementById('coach-email').value.trim();
+  const pw    = document.getElementById('coach-pw').value;
+  const btn   = document.getElementById('btn-login');
+  const err   = document.getElementById('auth-err');
+  if (!email || !pw) { err.textContent = '請填寫帳號和密碼'; return; }
+  btn.disabled = true; btn.textContent = '登入中…';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    err.textContent = '帳號或密碼錯誤';
+    btn.disabled = false; btn.textContent = '登入';
+    return;
+  }
+  currentCoach = data.user;
+  showDash();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('screen-auth').style.display = '';
+  document.getElementById('screen-dash').style.display = 'none';
+}
+
+// ── INIT ──
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'INITIAL_SESSION' && session?.user) {
+    currentCoach = session.user;
+    showDash();
+  }
+});
+
+// ── DASHBOARD ──
+async function showDash() {
+  document.getElementById('screen-auth').style.display = 'none';
+  document.getElementById('screen-dash').style.display = '';
+  document.getElementById('coach-info').textContent = currentCoach?.email || '';
+  await loadMembers();
+}
+
+async function loadMembers() {
+  const grid = document.getElementById('member-grid');
+  grid.innerHTML = '<div class="loading">載入會員資料中…</div>';
+
+  try {
+    // 取所有會員設定
+    const { data: settings, error: sErr } = await sb.from('member_settings').select('*');
+    if (sErr) throw sErr;
+
+    // 取所有訓練狀態
+    const { data: states } = await sb.from('training_state').select('*');
+    const { data: logs }   = await sb.from('training_logs').select('*');
+
+    // 取 auth users（需要 service role，這裡只能抓有設定的 user_id）
+    allMembers = (settings || []).map(s => {
+      const state = (states || []).find(st => st.user_id === s.user_id) || {};
+      const memberLogs = (logs || []).filter(l => l.user_id === s.user_id);
+      return { ...s, state, logs: memberLogs };
+    });
+
+    renderStats();
+    renderMembers(allMembers);
+  } catch(e) {
+    grid.innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+  }
+}
+
+function renderStats() {
+  const total = allMembers.length;
+  const active = allMembers.filter(m => m.state?.current_week > 1).length;
+  const goalMap = {};
+  allMembers.forEach(m => { if(m.goal) goalMap[m.goal] = (goalMap[m.goal]||0)+1; });
+  const topGoal = Object.entries(goalMap).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('stat-row').innerHTML = `
+    <div class="stat-card"><div class="stat-lbl">總會員數</div><div class="stat-val">${total}</div></div>
+    <div class="stat-card"><div class="stat-lbl">訓練中</div><div class="stat-val">${active}</div></div>
+    <div class="stat-card"><div class="stat-lbl">主要目標</div><div class="stat-val" style="font-size:15px">${topGoal ? GOAL_LBL[topGoal[0]] : '—'}</div></div>
+  `;
+  document.getElementById('dash-sub').textContent = `共 ${total} 位會員`;
+}
+
+function filterMembers() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  if (!q) { renderMembers(allMembers); return; }
+  renderMembers(allMembers.filter(m =>
+    (m.user_id||'').toLowerCase().includes(q)
+  ));
+}
+
+function renderMembers(members) {
+  const grid = document.getElementById('member-grid');
+  if (!members.length) {
+    grid.innerHTML = '<div class="empty">目前沒有會員資料</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  members.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'member-card';
+    const week   = m.state?.current_week || 1;
+    const meso   = m.state?.mesocycle || 1;
+    const goal   = GOAL_LBL[m.goal] || '—';
+    const level  = LEVEL_LBL[m.level] || '—';
+    const days   = m.days ? m.days + ' 天/週' : '—';
+    const weights = m.weights || {};
+    const weightEntries = Object.entries(WEIGHT_KEYS)
+      .filter(([k]) => weights[k])
+      .map(([k, lbl]) => `<div class="wt-item"><div class="wt-name">${lbl}</div><div class="wt-val">${weights[k]}</div></div>`)
+      .join('');
+
+    // 訓練紀錄統計
+    const totalSets = m.logs.length;
+    const completedDays = Object.keys(m.state?.completed_days || {}).length;
+
+    card.innerHTML = `
+      <div class="member-hd" onclick="toggleMember(this)">
+        <div>
+          <div class="member-name">${m.user_id.slice(0,8)}…</div>
+          <div class="member-meta">${goal}　${level}　${days}　Meso ${meso} 第 ${week} 週</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="member-bd">
+        <div class="detail-grid">
+          <div class="detail-card"><div class="detail-lbl">訓練目標</div><div class="detail-val">${goal}</div></div>
+          <div class="detail-card"><div class="detail-lbl">程度</div><div class="detail-val">${level}</div></div>
+          <div class="detail-card"><div class="detail-lbl">每週天數</div><div class="detail-val">${days}</div></div>
+          <div class="detail-card"><div class="detail-lbl">目前週次</div><div class="detail-val">Meso ${meso}　第 ${week} 週</div></div>
+          <div class="detail-card"><div class="detail-lbl">完成訓練日</div><div class="detail-val">${completedDays} 天</div></div>
+          <div class="detail-card"><div class="detail-lbl">紀錄組數</div><div class="detail-val">${totalSets} 組</div></div>
+          <div class="detail-card"><div class="detail-lbl">性別 / 年齡</div><div class="detail-val">${m.gender==='male'?'男':'女'} / ${m.age||'—'} 歲</div></div>
+          <div class="detail-card"><div class="detail-lbl">體重</div><div class="detail-val">${m.body_weight ? m.body_weight + ' kg' : '—'}</div></div>
+          <div class="detail-card"><div class="detail-lbl">Deload 方式</div><div class="detail-val">${DELOAD_LBL[m.deload]||'—'}</div></div>
+        </div>
+        ${weightEntries ? `
+          <div class="section-title">參考重量（10RM）</div>
+          <div class="weight-grid">${weightEntries}</div>
+        ` : ''}
+        ${m.logs.length ? `
+          <div class="section-title">近期訓練紀錄（最近 10 組）</div>
+          <table class="prog-table">
+            <thead><tr>
+              <th>週_天</th><th>動作</th><th>組</th><th>重量</th><th>次數</th><th>RIR</th>
+            </tr></thead>
+            <tbody>
+              ${m.logs.slice(-10).reverse().map(l => `<tr>
+                <td style="color:var(--text3);font-family:'DM Mono',monospace">${l.week||''}週_${(l.day_index||0)+1}天</td>
+                <td>${l.exercise_id||'—'}</td>
+                <td style="font-family:'DM Mono',monospace">${l.set_number||'—'}</td>
+                <td style="font-family:'DM Mono',monospace">${l.weight!=null?l.weight+' ':''}</td>
+                <td style="font-family:'DM Mono',monospace">${l.reps!=null?l.reps+'下':''}</td>
+                <td style="font-family:'DM Mono',monospace">${l.rir!=null?'RIR '+l.rir:''}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        ` : '<div style="font-size:12px;color:var(--text3);margin-top:.5rem">尚無訓練紀錄</div>'}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function toggleMember(hd) {
+  const bd = hd.nextElementSibling;
+  const cv = hd.querySelector('.chevron');
+  const open = bd.style.display === 'block';
+  bd.style.display = open ? 'none' : 'block';
+  cv.classList.toggle('open', !open);
+}
+</script>
+</body>
+</html>
