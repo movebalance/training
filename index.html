@@ -804,7 +804,7 @@ const SPLIT_MUSCLES = {
   腿:   ['quad','glute','ham']
 };
 
-const SPLIT_EX_LIMIT = {全身:5, 上肢:5, 下肢:4, 推:4, 拉:4, 腿:4};
+const SPLIT_EX_LIMIT = {全身:4, 上肢:4, 下肢:3, 推:3, 拉:3, 腿:3};
 
 const PUSH_MUSCLES = new Set(['chest','delt_a','delt_m','tri']);
 const PULL_MUSCLES = new Set(['back_v','back_h','delt_p','bi']);
@@ -973,10 +973,11 @@ const DELOAD_LBL = {volume:'降量型', intensity:'降強度型', active:'主動
 const SPLIT_LBL  = {3:'全身訓練 × 3', 4:'上下肢分割 × 2', 5:'上肢 × 3 + 下肢 × 2', 6:'推拉腿 PPL × 2'};
 
 // 每次訓練每個複合動作的組數範圍（依程度 × 頻率）
+// 每動作上限 5 組，週總量靠動作數遞增補足
 const SETS_BY_LEVEL_FREQ = {
-  beginner:     { 2:{start:3, max:5}, 3:{start:2, max:4} },
-  intermediate: { 2:{start:4, max:6}, 3:{start:3, max:5} },
-  advanced:     { 2:{start:4, max:7}, 3:{start:3, max:6} },
+  beginner:     { 2:{start:3, max:4}, 3:{start:2, max:3} },
+  intermediate: { 2:{start:3, max:5}, 3:{start:2, max:4} },
+  advanced:     { 2:{start:4, max:5}, 3:{start:3, max:5} },
 };
 
 function getSplitFreq(splitType, totalDays) {
@@ -1046,7 +1047,12 @@ function load() {
 // ══ 動作選擇引擎（Helms 版）══
 function pickExercises(splitType, week, dayKey) {
   const targets  = SPLIT_MUSCLES[splitType] || [];
-  const maxEx    = SPLIT_EX_LIMIT[splitType] || 4;
+  const baseMax  = SPLIT_EX_LIMIT[splitType] || 4;
+  const mw       = getMesoWeeks();
+  // 動作數依週次遞增：第1週 baseMax-1，最後訓練週達到 baseMax
+  // 減量週也用 baseMax（動作數不減，只減組數）
+  const weekForEx = Math.min(week, mw);
+  const maxEx = weekForEx <= Math.ceil(mw / 2) ? baseMax - 1 : baseMax;
   const cfg      = GOAL_CONFIG[A.goal||'both'];
   const overrides = (dayKey && S.exOverrides && S.exOverrides[dayKey]) || {};
 
