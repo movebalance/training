@@ -1017,7 +1017,7 @@ function getWeekRIR(week) {
 const STORAGE_KEY = 'yh_training_v30';
 let A = {
   goal:null, level:null, gender:null, age:null, days:null, bodyWeight:null,
-  meso:'auto', deload:'volume', frontSquat:false,
+  meso:'auto', deload:'volume', frontSquat:false, name:'',
   weights:{squat:null,legpress:null,legext:null,legcurl:null,deadlift:null,
            bench:null,chestpress:null,ohp:null,pulldown:null,seatedrow:null,pullup:null}
 };
@@ -1330,6 +1330,10 @@ function finishOnboard() {
   A.frontSquat=document.getElementById('ob-frontsq').checked;
   const bwVal = document.getElementById('ob-bw')?.value;
   if (bwVal) A.bodyWeight = parseFloat(bwVal);
+  // 從 auth 抓姓名
+  if (!A.name && currentUser?.user_metadata?.name) {
+    A.name = currentUser.user_metadata.name;
+  }
   S={currentWeek:1,completedDays:{},logs:{},adj:{},progOverrides:{},mesocycle:1,exOverrides:{}};
   save(); goScreen('screen-home'); renderHome();
 }
@@ -2075,6 +2079,7 @@ async function syncToSupabase() {
       // upsert settings
       await sb.from('member_settings').upsert({
         user_id: uid,
+        name: A.name || currentUser.user_metadata?.name || '',
         goal: A.goal, level: A.level, gender: A.gender,
         age: A.age, days: A.days, body_weight: A.bodyWeight,
         meso: A.meso, deload: A.deload, front_squat: A.frontSquat,
@@ -2126,6 +2131,7 @@ async function loadFromSupabase(uid) {
   if (settRes.data) {
     const d = settRes.data;
     A = { ...A,
+      name: d.name || '',
       goal: d.goal, level: d.level, gender: d.gender,
       age: d.age, days: d.days, bodyWeight: d.body_weight,
       meso: d.meso || 'auto', deload: d.deload || 'volume',

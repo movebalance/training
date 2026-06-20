@@ -281,7 +281,7 @@ function renderMembers(members) {
     card.innerHTML = `
       <div class="member-hd" onclick="toggleMember(this)">
         <div>
-          <div class="member-name">${m.user_id.slice(0,8)}…</div>
+          <div class="member-name">${m.name || m.user_id.slice(0,8)+'…'}</div>
           <div class="member-meta">${goal}　${level}　${days}　Meso ${meso} 第 ${week} 週</div>
         </div>
         <span class="chevron">▾</span>
