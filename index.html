@@ -2165,16 +2165,36 @@ async function doRegister() {
   if (!name || !email || !pw) { errEl.textContent='請填寫所有欄位'; return; }
   if (pw.length < 6) { errEl.textContent='密碼至少 6 個字元'; return; }
   btn.disabled = true; btn.textContent = '建立中…';
-  const { error } = await sb.auth.signUp({
-    email, password: pw,
-    options: { data: { name } }
-  });
-  if (error) {
-    errEl.textContent = error.message;
+  errEl.textContent = '';
+  msgEl.textContent = '';
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email, password: pw,
+      options: { data: { name } }
+    });
+    if (error) {
+      // 帳號已存在：提示改用登入
+      if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+        errEl.textContent = '此電子郵件已註冊，請直接登入。';
+      } else {
+        errEl.textContent = error.message;
+      }
+      btn.disabled = false; btn.textContent = '建立帳號';
+      return;
+    }
+    // 註冊成功，直接嘗試登入（信箱驗證已關閉）
+    if (data?.user) {
+      msgEl.textContent = '✓ 帳號建立成功，登入中…';
+      const { error: loginErr } = await sb.auth.signInWithPassword({ email, password: pw });
+      if (loginErr) {
+        msgEl.textContent = '✓ 帳號建立成功！請用剛才的帳號密碼登入。';
+        switchAuthTab('login');
+      }
+      // 登入成功會由 onAuthStateChange 自動跳轉
+    }
     btn.disabled = false; btn.textContent = '建立帳號';
-  } else {
-    errEl.textContent = '';
-    msgEl.textContent = '✓ 帳號建立成功！請確認信箱驗證郵件後登入。';
+  } catch(e) {
+    errEl.textContent = '網路錯誤，請再試一次。';
     btn.disabled = false; btn.textContent = '建立帳號';
   }
 }
@@ -2191,25 +2211,27 @@ async function doLogout() {
 }
 
 // ── INIT ──
+let authInitialized = false;
 sb.auth.onAuthStateChange(async (event, session) => {
+  if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN' && event !== 'SIGNED_OUT') return;
+  // SIGNED_IN：初次登入或註冊後自動登入都要處理
+  if (event === 'SIGNED_IN' && authInitialized) return;
+  authInitialized = true;
   if (session?.user) {
     currentUser = session.user;
     setSyncStatus('sync');
     let hasCloud = false;
     try {
       hasCloud = await loadFromSupabase(currentUser.id);
-    } catch(e) {
-      // 網路失敗時 fallback 到 localStorage
-    }
+    } catch(e) {}
     setSyncStatus(hasCloud ? 'ok' : 'err');
     if (hasCloud) {
       goScreen('screen-home'); renderHome();
     } else {
-      // 雲端失敗或無資料，嘗試 localStorage
       const hasLocal = load();
       if (hasLocal) {
         goScreen('screen-home'); renderHome();
-        syncToSupabase(); // push local data to cloud
+        syncToSupabase();
       } else {
         goScreen('screen-onboard');
       }
