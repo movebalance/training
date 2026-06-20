@@ -2096,11 +2096,18 @@ async function syncToSupabase() {
 }
 
 async function loadFromSupabase(uid) {
-  const [settRes, stateRes, logsRes] = await Promise.all([
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+  const fetchData = Promise.all([
     sb.from('member_settings').select('*').eq('user_id', uid).single(),
     sb.from('training_state').select('*').eq('user_id', uid).single(),
     sb.from('training_logs').select('*').eq('user_id', uid)
   ]);
+  let settRes, stateRes, logsRes;
+  try {
+    [settRes, stateRes, logsRes] = await Promise.race([fetchData, timeout]);
+  } catch(e) {
+    return false; // timeout 或錯誤，直接 fallback
+  }
   if (settRes.data) {
     const d = settRes.data;
     A = { ...A,
