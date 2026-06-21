@@ -469,11 +469,11 @@ svg.icon { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fil
   <div id="ob-s1">
     <div class="step-lbl">步驟 1 / 7</div>
     <div class="step-title">主要訓練目標</div>
-    <div class="step-sub">決定每週三種訓練日的強度分配比例</div>
+    <div class="step-sub">決定每次訓練的次數範圍與強度</div>
     <div class="notice" style="margin-bottom:1rem">
-      <strong>肌力提升</strong>：偏重大重量低次數（5×5），適合想提升最大力量或運動表現的人<br>
-      <strong>肌肥大</strong>：偏重中等重量中次數（4×8、3×12），適合以增加肌肉量為主要目標<br>
-      <strong>兩者兼顧</strong>：三種強度均衡搭配，適合大多數健身客戶，也是最推薦的入門選擇
+      <strong>肌力提升</strong>：大重量低次數（3–5 下），適合想提升最大力量或運動表現的人<br>
+      <strong>肌肥大</strong>：中等重量中次數（8–12 下），適合以增加肌肉量為主要目標<br>
+      <strong>兩者兼顧</strong>：中等重量中低次數（6–8 下），適合大多數健身客戶，也是最推薦的入門選擇
     </div>
     <div class="chips">
       <div class="chip" data-f="goal" data-v="strength" onclick="pick(this)">肌力提升</div>
@@ -804,7 +804,7 @@ const SPLIT_MUSCLES = {
   腿:   ['quad','glute','ham']
 };
 
-const SPLIT_EX_LIMIT = {全身:4, 上肢:4, 下肢:3, 推:3, 拉:3, 腿:3};
+const SPLIT_EX_LIMIT = {全身:4, 上肢:4, 下肢:3, 推:4, 拉:4, 腿:3};
 
 const PUSH_MUSCLES = new Set(['chest','delt_a','delt_m','tri']);
 const PULL_MUSCLES = new Set(['back_v','back_h','delt_p','bi']);
@@ -1003,7 +1003,8 @@ function getWeekSets(week, numCompounds, splitType) {
     const lastSets = Math.round(cfg.start + (mw - 1) * inc);
     return Math.max(1, Math.round(lastSets * 0.5));
   }
-  return Math.round(cfg.start + (week - 1) * inc);
+  // 最低 2 組保護（單組訓練無實際效果）
+  return Math.max(2, Math.round(cfg.start + (week - 1) * inc));
 }
 
 // 本週建議 RIR 目標（Helms：第1週輕鬆 RIR 3–4，逐週下降到最後一週 RIR 0–1）
@@ -1049,10 +1050,11 @@ function pickExercises(splitType, week, dayKey) {
   const targets  = SPLIT_MUSCLES[splitType] || [];
   const baseMax  = SPLIT_EX_LIMIT[splitType] || 4;
   const mw       = getMesoWeeks();
-  // 動作數依週次遞增：第1週 baseMax-1，最後訓練週達到 baseMax
-  // 減量週也用 baseMax（動作數不減，只減組數）
   const weekForEx = Math.min(week, mw);
-  const maxEx = weekForEx <= Math.ceil(mw / 2) ? baseMax - 1 : baseMax;
+  // 上肢/全身/推/拉：前半 meso 少一個動作，後半達到上限
+  // 下肢/腿：動作數固定（本來就少，不需要遞增）
+  const isLower = splitType === '下肢' || splitType === '腿';
+  const maxEx = isLower ? baseMax : (weekForEx <= Math.ceil(mw / 2) ? baseMax - 1 : baseMax);
   const cfg      = GOAL_CONFIG[A.goal||'both'];
   const overrides = (dayKey && S.exOverrides && S.exOverrides[dayKey]) || {};
 
@@ -1143,9 +1145,11 @@ function pickExercises(splitType, week, dayKey) {
   }
 
   // ── Pass 2：孤立動作補強 ──
+  // PPL 分割每個肌群應被直接訓練，閾值提高
+  const isPPL = ['推','拉','腿'].includes(splitType);
   const underserved = targets.filter(m => {
     if (m==='delt_a') return false;
-    const threshold = (m==='tri'||m==='bi') ? 0.4 : 0.7;
+    const threshold = isPPL ? 0.5 : ((m==='tri'||m==='bi') ? 0.4 : 0.7);
     return (acc[m]||0) < (MUSCLE_MEV[m]||10) * threshold;
   });
   const isos = pool.filter(e =>
