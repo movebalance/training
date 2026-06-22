@@ -823,7 +823,7 @@ const EX_DB = {
   legext:    {id:'legext',    name:'Leg Extension',  equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['quad'],              indirect:{}, preferredMode:'C'},
   legcurl:   {id:'legcurl',   name:'Leg Curl',       equip:'掛片',            wk:'legcurl',    unit:'kg',  step:2.5, compound:false, ok:['B','C'],     primary:['ham'],               indirect:{}, preferredMode:'C'},
   // 新增下肢動作
-  slrdl:     {id:'slrdl',     name:'單腳羅馬尼亞硬舉', equip:'啞鈴',          wk:'deadlift',   unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['ham','glute'],       indirect:{}, preferredMode:'B'},
+  slrdl:     {id:'slrdl',     name:'單腳硬舉', equip:'槓鈴 or 啞鈴', wk:'deadlift', unit:'kg', step:2.5, compound:true, primary:['ham','glute'], indirect:{}, preferredMode:'B'},
   goblet:    {id:'goblet',    name:'高腳杯深蹲',       equip:'啞鈴',          wk:'squat',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', beginnerOnly:true, maxWeight:20},
   lateralsq: {id:'lateralsq', name:'側蹲',             equip:'啞鈴',          wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'C'},
   beltsquat: {id:'beltsquat',  name:'腰帶深蹲（Belt Squat）', equip:'啞鈴 or 腰帶',  wk:'squat',      unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
@@ -885,15 +885,15 @@ const WEIGHT_CONVERT = {
   // 傳統硬舉 → 其他腿後動作
   deadlift: {
     rdl:       w => Math.round(w * 0.85 / 2.5) * 2.5,  // RDL ≈ 85%
-    slrdl:     w => Math.round(w * 0.30 / 2) * 2,      // 單腳 ≈ 30%（單手啞鈴）
+    slrdl:     w => Math.round(w * 0.50 / 2.5) * 2.5,  // 單腳硬舉 ≈ 50%
   },
   rdl: {
     deadlift:  w => Math.round(w / 0.85 / 2.5) * 2.5,
-    slrdl:     w => Math.round(w * 0.35 / 2) * 2,
+    slrdl:     w => Math.round(w * 0.60 / 2.5) * 2.5,  // RDL→單腳 ≈ 60%
   },
   slrdl: {
-    rdl:       w => Math.round(w / 0.35 / 2.5) * 2.5,
-    deadlift:  w => Math.round(w / 0.30 / 2.5) * 2.5,
+    rdl:       w => Math.round(w / 0.60 / 2.5) * 2.5,
+    deadlift:  w => Math.round(w / 0.50 / 2.5) * 2.5,
   },
   // 背蹲舉 → 其他股四頭動作
   squat: {
@@ -1519,9 +1519,16 @@ function openSession(dayIdx) {
       const originalEx = EX_DB[originalId] || ex;
       const srcWeight = originalEx.wk ? (A.weights[originalEx.wk]||null) : null;
       const convertedW = srcWeight ? getConvertedWeight(originalId, alt.id, srcWeight) : null;
-      const altSW = convertedW
-        ? Math.round(convertedW * 1.33 * cfg.pct / (alt.step||2.5)) * (alt.step||2.5)
-        : (alt.wk ? getSW(alt, cfg.pct) : null);
+      // convertedW 是換算後的 10RM，直接用 getSW 邏輯計算建議重量
+      // 不能再乘 1.33，因為 getSW 內部已經有 getRM1（×1.33）
+      let altSW = null;
+      if (convertedW) {
+        const rm1 = Math.round(convertedW * 1.33);
+        altSW = Math.round(rm1 * cfg.pct / (alt.step||2.5)) * (alt.step||2.5);
+        if (altSW <= 0) altSW = null;
+      } else if (alt.wk) {
+        altSW = getSW(alt, cfg.pct);
+      }
       const altWeightStr = altSW ? `　<span style="color:var(--success);font-size:11px">建議 ${altSW} ${alt.unit}</span>` : '';
       return `<label style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">
         <input type="radio" name="swap_${adjKey}_${ei}" value="${alt.id}"
