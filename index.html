@@ -817,33 +817,32 @@ const EX_DB = {
   frontsq:   {id:'frontsq',   name:'前蹲舉',         equip:'蹲舉架 + 槓鈴',   wk:'squat',      unit:'kg',  step:2.5, compound:true,  ok:['A','B'],     primary:['quad'],              indirect:{glute:.5, ham:.3}, advanced:true, preferredMode:'A'},
   deadlift:  {id:'deadlift',  name:'傳統硬舉',       equip:'蹲舉架 + 槓鈴',   wk:'deadlift',   unit:'kg',  step:2.5, compound:true,  ok:['A','B'],     primary:['ham','glute'],       indirect:{quad:.5, back_h:.3}, preferredMode:'A'},
   rdl:       {id:'rdl',       name:'羅馬尼亞硬舉',   equip:'槓鈴',            wk:'deadlift',   unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['ham','glute'],       indirect:{}},
-  lunge:     {id:'lunge',     name:'啞鈴弓步',       equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
+  lunge:     {id:'lunge',     name:'啞鈴弓步',       equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', perHand:true},
   // 下肢孤立
   legpress:  {id:'legpress',  name:'腿推機',         equip:'插銷',            wk:'legpress',   unit:'格',  step:1,   compound:false, ok:['A','B','C'], primary:['quad'],              indirect:{glute:.3}, preferredMode:'B'},
   legext:    {id:'legext',    name:'Leg Extension',  equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['quad'],              indirect:{}, preferredMode:'C'},
   legcurl:   {id:'legcurl',   name:'Leg Curl',       equip:'掛片',            wk:'legcurl',    unit:'kg',  step:2.5, compound:false, ok:['B','C'],     primary:['ham'],               indirect:{}, preferredMode:'C'},
   // 新增下肢動作
-  slrdl:     {id:'slrdl',     name:'單腳硬舉', equip:'槓鈴 or 啞鈴', wk:'deadlift', unit:'kg', step:2.5, compound:true, primary:['ham','glute'], indirect:{}, preferredMode:'B'},
-  goblet:    {id:'goblet',    name:'高腳杯深蹲',       equip:'啞鈴',          wk:'squat',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', beginnerOnly:true, maxWeight:20},
-  lateralsq: {id:'lateralsq', name:'側蹲',             equip:'啞鈴',          wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'C'},
-  beltsquat: {id:'beltsquat',  name:'腰帶深蹲（Belt Squat）', equip:'啞鈴 or 腰帶',  wk:'squat',      unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
-  pistol:    {id:'pistol',    name:'單腳蹲（Pistol）',  equip:'徒手 or 啞鈴', wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', advanced:true},
-  bulgarian: {id:'bulgarian', name:'後腳抬高蹲',         equip:'啞鈴',          wk:null,         unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B'},
+  slrdl:     {id:'slrdl',     name:'單腳硬舉',       equip:'槓鈴 or 啞鈴',   wk:'deadlift',   unit:'kg',  step:2.5, compound:true,                    primary:['ham','glute'],       indirect:{}, preferredMode:'B'},
+  goblet:    {id:'goblet',    name:'高腳杯深蹲',     equip:'啞鈴',            wk:'squat',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', beginnerOnly:true, maxWeight:20},
+  lateralsq: {id:'lateralsq', name:'側蹲',           equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'C', perHand:true},
+  pistol:    {id:'pistol',    name:'單腳蹲（Pistol）',equip:'徒手 or 啞鈴',  wk:null,         unit:'kg',  step:2,   compound:true,  ok:['B','C'],     primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', advanced:true},
+  bulgarian: {id:'bulgarian', name:'後腳抬高蹲',     equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['quad','glute'],      indirect:{ham:.3}, preferredMode:'B', perHand:true},
   hipthrust: {id:'hipthrust', name:'臀推機',         equip:'掛片',            wk:null,         unit:'kg',  step:2.5, compound:false, ok:['B','C'],     primary:['glute'],             indirect:{ham:.3}, preferredMode:'C'},
   // 上肢推複合
   bench:     {id:'bench',     name:'槓鈴臥推',       equip:'蹲舉架 + 臥推椅', wk:'bench',      unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'A'},
-  dbbench:   {id:'dbbench',   name:'啞鈴臥推',       equip:'啞鈴 + 臥推椅',  wk:'bench',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'B'},
+  dbbench:   {id:'dbbench',   name:'啞鈴臥推',       equip:'啞鈴 + 臥推椅',  wk:'bench',      unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'B', perHand:true},
   ohp:       {id:'ohp',       name:'槓鈴肩推',       equip:'蹲舉架',          wk:'ohp',        unit:'kg',  step:2.5, compound:true,  ok:['A','B'],     primary:['delt_m','delt_a'],   indirect:{tri:.5}, preferredMode:'A'},
-  dbohp:     {id:'dbohp',     name:'啞鈴肩推',       equip:'啞鈴',            wk:'ohp',        unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['delt_m','delt_a'],   indirect:{tri:.5}, preferredMode:'AB'},
+  dbohp:     {id:'dbohp',     name:'啞鈴肩推',       equip:'啞鈴',            wk:'ohp',        unit:'kg',  step:2,   compound:true,  ok:['A','B','C'], primary:['delt_m','delt_a'],   indirect:{tri:.5}, preferredMode:'AB', perHand:true},
   cgbench:   {id:'cgbench',   name:'窄握臥推',       equip:'蹲舉架',          wk:'bench',      unit:'kg',  step:2.5, compound:false, ok:['A','B','C'], primary:['tri'],               indirect:{chest:.3}, preferredMode:'B'},
   // 上肢推孤立
   chestpress:{id:'chestpress',name:'胸推機',         equip:'插銷',            wk:'chestpress', unit:'格',  step:1,   compound:false, ok:['A','B','C'], primary:['chest'],             indirect:{tri:.5}, preferredMode:'B'},
   fly:       {id:'fly',       name:'飛鳥機台',       equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['chest'],             indirect:{}, preferredMode:'C'},
   cablefly:  {id:'cablefly',  name:'大飛鳥',         equip:'插銷',            wk:null,         unit:'格',  step:1,   compound:false, ok:['B','C'],     primary:['chest'],             indirect:{}, preferredMode:'C'},
-  // 中三角孤立（唯一有效直接訓練中三角的動作）
-  lateral:   {id:'lateral',   name:'啞鈴側平舉',     equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['B','C'],     primary:['delt_m'],            indirect:{}, preferredMode:'C'},
+  // 中三角孤立
+  lateral:   {id:'lateral',   name:'啞鈴側平舉',     equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['B','C'],     primary:['delt_m'],            indirect:{}, preferredMode:'C', perHand:true},
   // 三頭孤立
-  overext:   {id:'overext',   name:'過頭三頭伸展',   equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['C'],         primary:['tri'],               indirect:{}, preferredMode:'C'},
+  overext:   {id:'overext',   name:'過頭三頭伸展',   equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['C'],         primary:['tri'],               indirect:{}, preferredMode:'C', perHand:true},
   dips:      {id:'dips',      name:'撐體 Dips',      equip:'單槓',            wk:null,         unit:'自重',step:0,   compound:false, ok:['A','B','C'], primary:['tri'],               indirect:{chest:.3}, preferredMode:'B'},
   // 上肢拉複合
   pulldown:  {id:'pulldown',  name:'下拉',           equip:'插銷',            wk:'pulldown',   unit:'格',  step:1,   compound:true,  ok:['A','B','C'], primary:['back_v'],            indirect:{bi:.5, delt_p:.3}, preferredMode:'A'},
@@ -853,7 +852,7 @@ const EX_DB = {
   trow:      {id:'trow',      name:'T字划船',        equip:'掛片',            wk:null,         unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['back_h'],            indirect:{bi:.5, delt_p:.5}, preferredMode:'B'},
   bbrow:     {id:'bbrow',     name:'槓鈴划船',       equip:'槓鈴',            wk:'pulldown',   unit:'kg',  step:2.5, compound:true,  ok:['A','B','C'], primary:['back_h'],            indirect:{bi:.5, delt_p:.5}, preferredMode:'AB'},
   // 上肢拉孤立
-  dbcurl:    {id:'dbcurl',    name:'啞鈴二頭彎舉',   equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['A','B','C'], primary:['bi'],                indirect:{}, preferredMode:'C'},
+  dbcurl:    {id:'dbcurl',    name:'啞鈴二頭彎舉',   equip:'啞鈴',            wk:null,         unit:'kg',  step:2,   compound:false, ok:['A','B','C'], primary:['bi'],                indirect:{}, preferredMode:'C', perHand:true},
   bbcurl:    {id:'bbcurl',    name:'槓鈴二頭彎舉',   equip:'槓鈴',            wk:null,         unit:'kg',  step:2.5, compound:false, ok:['A','B','C'], primary:['bi'],                indirect:{}, preferredMode:'C'}
 };
 
@@ -901,11 +900,6 @@ const WEIGHT_CONVERT = {
     goblet:    w => Math.round(w * 0.25 / 2) * 2,
     lunge:     w => Math.round(w * 0.30 / 2) * 2,
     bulgarian: w => Math.round(w * 0.35 / 2) * 2,
-    beltsquat: w => Math.round(w * 1.15 / 2.5) * 2.5,  // 腰帶深蹲通常比背蹲重 10–20%
-  },
-  beltsquat: {
-    squat:     w => Math.round(w / 1.15 / 2.5) * 2.5,
-    legpress:  w => Math.round(w * 2.0 / 1) * 1,
   },
   legpress: {
     squat:     w => Math.round(w * 0.50 / 2.5) * 2.5,
@@ -1116,7 +1110,7 @@ function pickExercises(splitType, week, dayKey) {
   }
 
   const MUTEX_GROUPS = [
-    new Set(['squat','frontsq','goblet','lunge','bulgarian','lateralsq','pistol','beltsquat']),
+    new Set(['squat','frontsq','goblet','lunge','bulgarian','lateralsq','pistol']),
     new Set(['deadlift','rdl','slrdl']),
   ];
   function isMutexBlocked(exId) {
@@ -1235,12 +1229,14 @@ function estimateWeightFromBW(wk) {
 function getSW(ex, pct, basePct) {
   if (!ex.wk||ex.unit==='下'||ex.unit==='自重') return null;
   const r1=getRM1(ex.wk); if(!r1) return null;
-  const w=Math.round(r1*pct/ex.step)*ex.step;
+  let w=Math.round(r1*pct/ex.step)*ex.step;
+  // perHand：啞鈴雙手動作，建議重量為單手（總重 ÷ 2）
+  if (ex.perHand) w = Math.round((w / 2) / ex.step) * ex.step;
   // 如果有 basePct（調整後），確保建議重量跟基準有差異
   if (basePct !== undefined && basePct !== pct) {
-    const wBase = Math.round(r1*basePct/ex.step)*ex.step;
+    let wBase = Math.round(r1*basePct/ex.step)*ex.step;
+    if (ex.perHand) wBase = Math.round((wBase / 2) / ex.step) * ex.step;
     if (w === wBase) {
-      // rounding 後相同，手動加減一個 step
       return pct < basePct
         ? Math.max(ex.step, wBase - ex.step)
         : wBase + ex.step;
@@ -1515,13 +1511,13 @@ function openSession(dayIdx) {
     } else {
       sw = getSW(ex, finalPct, adj!==0 ? basePct : undefined);
     }
-    const swD=sw?sw+' '+ex.unit:'—';
+    const swD=sw?(sw+' '+ex.unit+(ex.perHand?' /手':'')):'—';
     const exSets=ex.effectiveSets;
     const primaryStr=(ex.primary||[]).map(m=>MUSCLE_NAME[m]).join('、');
     const indirectStr=Object.entries(ex.indirect||{})
       .filter(([,c])=>c>0).map(([m,c])=>`${MUSCLE_NAME[m]}×${c}`).join('、');
     const SWAP_MUTEX = [
-      new Set(['squat','frontsq','goblet','lunge','bulgarian','lateralsq','pistol','beltsquat']),
+      new Set(['squat','frontsq','goblet','lunge','bulgarian','lateralsq','pistol']),
       new Set(['deadlift','rdl','slrdl']),
     ];
     function inSameSwapGroup(id1, id2) {
