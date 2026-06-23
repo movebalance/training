@@ -1514,8 +1514,9 @@ function openSession(dayIdx) {
       inSameSwapGroup(ex.id, e.id)
     ).slice(0,4);
     const altHtml=altPool.map(alt=>{
-      const overrideId = S.exOverrides?.[adjKey]?.[ei];
-      const originalId = overrideId ? overrideId : ex.id;
+      // originalId 永遠用課表原始動作（pickExercises 選出的），不隨替換改變
+      // 這樣重量換算的基準才穩定
+      const originalId = ex.id;
       const originalEx = EX_DB[originalId] || ex;
       const srcWeight = originalEx.wk ? (A.weights[originalEx.wk]||null) : null;
       const convertedW = srcWeight ? getConvertedWeight(originalId, alt.id, srcWeight) : null;
