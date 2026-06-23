@@ -901,11 +901,11 @@ const WEIGHT_CONVERT = {
     goblet:    w => Math.round(w * 0.25 / 2) * 2,
     lunge:     w => Math.round(w * 0.30 / 2) * 2,
     bulgarian: w => Math.round(w * 0.35 / 2) * 2,
-    beltsquat: w => Math.round(w * 0.90 / 2.5) * 2.5,  // 腰帶深蹲接近槓鈴深蹲
+    beltsquat: w => Math.round(w * 1.15 / 2.5) * 2.5,  // 腰帶深蹲通常比背蹲重 10–20%
   },
   beltsquat: {
-    squat:     w => Math.round(w / 0.90 / 2.5) * 2.5,
-    legpress:  w => Math.round(w * 2.0 / 0.90 / 1) * 1,
+    squat:     w => Math.round(w / 1.15 / 2.5) * 2.5,
+    legpress:  w => Math.round(w * 2.0 / 1) * 1,
   },
   legpress: {
     squat:     w => Math.round(w * 0.50 / 2.5) * 2.5,
@@ -1490,7 +1490,31 @@ function openSession(dayIdx) {
       ? 1 - ex.compoundIndex * 0.03 : 1;
     const finalPct = pct * decayFactor;
     const basePct  = cfg.pct * decayFactor;
-    const sw=getSW(ex, finalPct, adj!==0 ? basePct : undefined);
+
+    // 建議重量：優先用替換後動作自己的參考重量
+    // 如果替換後動作沒有參考重量，嘗試從原始動作換算
+    const overrideId = S.exOverrides?.[adjKey]?.[ei];
+    let sw;
+    if (overrideId && EX_DB[overrideId]) {
+      const overrideEx = EX_DB[overrideId];
+      if (overrideEx.wk && A.weights[overrideEx.wk]) {
+        // 替換後動作有自己的參考重量，直接用
+        sw = getSW(overrideEx, finalPct, adj!==0 ? basePct : undefined);
+      } else {
+        // 沒有，嘗試從原始動作換算
+        const origEx = EX_DB[ex.id] || ex;
+        const srcW = origEx.wk ? A.weights[origEx.wk] : null;
+        const convertedW = srcW ? getConvertedWeight(origEx.id, overrideId, srcW) : null;
+        if (convertedW) {
+          const rm1 = Math.round(convertedW * 1.33);
+          sw = Math.round(rm1 * finalPct / (overrideEx.step||2.5)) * (overrideEx.step||2.5);
+        } else {
+          sw = getSW(ex, finalPct, adj!==0 ? basePct : undefined);
+        }
+      }
+    } else {
+      sw = getSW(ex, finalPct, adj!==0 ? basePct : undefined);
+    }
     const swD=sw?sw+' '+ex.unit:'—';
     const exSets=ex.effectiveSets;
     const primaryStr=(ex.primary||[]).map(m=>MUSCLE_NAME[m]).join('、');
